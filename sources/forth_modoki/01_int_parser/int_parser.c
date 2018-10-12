@@ -10,7 +10,7 @@ int main() {
     int answer3 = 0;
 
     // write something here.
-
+    sscanf(input, "%d %d %d", &answer1, &answer2, &answer3);
 
     // verity result.
     assert(answer1 == 123);
