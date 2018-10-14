@@ -44,9 +44,23 @@ int parse_one(token_type_t* out_type, int* out_val, const int prev) {
    return prev;
 }
 
+void test_parse_one_123() {
+   cl_getc_set_src("123");
+   token_type_t t;
+   int v = 0;
+   
+   parse_one(&t, &v, cl_getc());
+   assert(t == NUMBER);
+   assert(v == 123);
+}
+
 int main() {
     int answer1 = 0;
     int answer2 = 0;
+
+    // test
+    test_parse_one_123();
+    cl_getc_set_src("123 456");
 
     // write something here.
     token_type_t t;
