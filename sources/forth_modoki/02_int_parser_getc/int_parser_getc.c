@@ -54,12 +54,31 @@ void test_parse_one_123() {
    assert(v == 123);
 }
 
+void test_parse_one_123_456() {
+   cl_getc_set_src("123 456");
+   token_type_t t;
+   int v = 0;
+   int next = 0;
+   
+   next = parse_one(&t, &v, cl_getc());
+   assert(t == NUMBER);
+   assert(v == 123);
+
+   next = parse_one(&t, &v, next);
+   assert(t == SPACE);
+   
+   next = parse_one(&t, &v, next);
+   assert(t == NUMBER);
+   assert(v == 456);
+}
+
 int main() {
     int answer1 = 0;
     int answer2 = 0;
 
     // test
     test_parse_one_123();
+    test_parse_one_123_456();
     cl_getc_set_src("123 456");
 
     // write something here.
