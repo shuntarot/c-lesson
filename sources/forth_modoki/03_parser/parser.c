@@ -35,6 +35,17 @@ static int is_number(const int ch) {
       return 0;
 }
 
+static int is_alpha(const int ch) {
+   if (('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z'))
+      return 1;
+   else
+      return 0;
+}
+
+static int is_alnum(const int ch) {
+   return is_alpha(ch) || is_number(ch);
+}
+
 int parse_one(int prev_ch, struct Token *out_token) {
    
    // TODO: Implement here!
@@ -44,15 +55,7 @@ int parse_one(int prev_ch, struct Token *out_token) {
       prev_ch = cl_getc();
    }
 
-   if (prev_ch == ' ') {
-      do {
-	 ch = cl_getc();
-      } while (ch == ' ');
-      
-      out_token->ltype = SPACE;
-      return ch;
-   }
-   else if (is_number(prev_ch)) {
+   if (is_number(prev_ch)) {
       int val = prev_ch - '0';
       do {
 	 ch = cl_getc();
@@ -66,11 +69,56 @@ int parse_one(int prev_ch, struct Token *out_token) {
       out_token->u.number = val;
       return ch;
    }
-   else if (ch == '\0') {
+   
+   if (prev_ch == ' ') {
+      do {
+	 ch = cl_getc();
+      } while (ch == ' ');
+      
+      out_token->ltype = SPACE;
+      return ch;
+   }
+
+   if (is_alpha(prev_ch)) {
+      char name[NAME_SIZE] = "";
+      int i = 0;
+      name[i++] = prev_ch;
+      while (is_alnum(ch = cl_getc())) {
+	 name[i++] = ch;
+      }
+      out_token->ltype = EXECUTABLE_NAME;
+      out_token->u.name = name;
+      return ch;
+   }
+
+   if (prev_ch == '/') {
+      char name[NAME_SIZE] = "";
+      int i = 0;
+      while (is_alnum(ch = cl_getc())) {
+	 name[i++] = ch;
+      }
+      out_token->ltype = LITERAL_NAME;
+      out_token->u.name = name;
+      return ch;
+   }
+
+   if (prev_ch == '{') {
+      out_token->ltype = OPEN_CURLY;
+      out_token->u.onechar = '{';
+      return cl_getc();
+   }
+
+   if (prev_ch == '}') {
+      out_token->ltype = CLOSE_CURLY;
+      out_token->u.onechar = '}';
+      return cl_getc();
+   }
+   
+   if (ch == '\0') {
       out_token->ltype = END_OF_FILE;
       return EOF;
    }
-   
+
    out_token->ltype = UNKNOWN;
    return EOF;
 }
@@ -148,15 +196,49 @@ static void test_parse_one_empty_should_return_END_OF_FILE() {
     assert(token.ltype == expect);
 }
 
+static void test_parse_one_executable_name() {
+   char* input = "add";
+   char* expect_name = "add";
+   int expect_type = EXECUTABLE_NAME;
+
+   struct Token token = {UNKNOWN, {0}};
+   int ch;
+
+   cl_getc_set_src(input);
+   ch = parse_one(EOF, &token);
+
+   assert(ch == EOF);
+   assert(token.ltype  == expect_type);
+   assert(*(token.u.name) == *expect_name);
+}
+
+static void test_parse_one_literal_name() {
+   char* input = "/add";
+   char* expect_name = "add";
+   int expect_type = LITERAL_NAME;
+
+   struct Token token = {UNKNOWN, {0}};
+   int ch;
+
+   cl_getc_set_src(input);
+   ch = parse_one(EOF, &token);
+
+   assert(ch == EOF);
+   assert(token.ltype  == expect_type);
+   assert(*(token.u.name) == *expect_name);
+}
+
 
 static void unit_tests() {
     test_parse_one_empty_should_return_END_OF_FILE();
     test_parse_one_number();
+    test_parse_one_executable_name();
+    test_parse_one_literal_name();
 }
 
 int main() {
     unit_tests();
     cl_getc_set_src("123 45 add /some { 2 3 add } def");
-//    parser_print_all();
+    parser_print_all();
     return 1;
 }
