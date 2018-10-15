@@ -1,7 +1,6 @@
 #include "clesson.h"
 #include <string.h>
 
-/* static const char* const input = "123 456"; */
 static const char* input = "123 456";
 static int pos = 0;
 

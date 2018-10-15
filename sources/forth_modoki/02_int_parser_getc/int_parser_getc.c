@@ -6,16 +6,23 @@ cc cl_getc.c int_parser_getc.c
 */
 typedef enum token_type {NUMBER, SPACE} token_type_t;
 
-int is_number(const int a) {
+static int is_number(const int a) {
    if ('0' <= a && a <= '9')
       return 1;
    else
       return 0;
 }
 
-int parse_one(token_type_t* out_type, int* out_val, const int prev) {
+int parse_one(token_type_t* out_type, int* out_val, const int prev_ch) {
    int a;
+   int prev;
 
+   if (prev_ch == 0) {
+      prev = cl_getc();
+   } else {
+      prev = prev_ch;
+   }
+   
    if (prev == ' ') {
       do {
 	 a = cl_getc();
@@ -49,7 +56,7 @@ void test_parse_one_123() {
    token_type_t t;
    int v = 0;
    
-   parse_one(&t, &v, cl_getc());
+   parse_one(&t, &v, 0);
    assert(t == NUMBER);
    assert(v == 123);
 }
@@ -60,7 +67,7 @@ void test_parse_one_123_456() {
    int v = 0;
    int next = 0;
    
-   next = parse_one(&t, &v, cl_getc());
+   next = parse_one(&t, &v, 0);
    assert(t == NUMBER);
    assert(v == 123);
 
@@ -85,9 +92,7 @@ int main() {
     token_type_t t;
     int i = 0;
     int v[2] = {0};
-    int next;
-    
-    next = cl_getc();
+    int next = 0;
 
     do {
        next = parse_one(&t, &v[i], next);
