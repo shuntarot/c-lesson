@@ -171,6 +171,13 @@ static void stack_clear() {
    printf("clear stack %x\n", dummy[1023]);
 }
 
+static int streq(const char *s1, const char *s2) {
+   return (strcmp(s1, s2) == 0);
+}
+
+static void assert_streq(const char *s1, const char *s2) {
+   assert(streq(s1, s2));
+}
 
 static void test_parse_one_number() {
     char *input = "123";
@@ -214,8 +221,8 @@ static void test_parse_one_executable_name() {
    ch = parse_one(EOF, &token);
 
    assert(ch == EOF);
-   assert(token.ltype  == expect_type);
-   assert(strcmp(token.u.name, expect_name) == 0);
+   assert(token.ltype == expect_type);
+   assert_streq(token.u.name, expect_name);
 }
 
 static void test_parse_one_literal_name() {
@@ -230,8 +237,8 @@ static void test_parse_one_literal_name() {
    ch = parse_one(EOF, &token);
 
    assert(ch == EOF);
-   assert(token.ltype  == expect_type);
-   assert(strcmp(token.u.name, expect_name) == 0);
+   assert(token.ltype == expect_type);
+   assert_streq(token.u.name, expect_name);
 }
 
 static void unit_tests() {
@@ -243,8 +250,8 @@ static void unit_tests() {
 }
 
 int main() {
-    unit_tests();
-    cl_getc_set_src("123 45 add /some { 2 3 add } def");
-    parser_print_all();
-    return 1;
+   unit_tests();
+   cl_getc_set_src("123 45 add /some { 2 3 add } def");
+   parser_print_all();
+   return 1;
 }
