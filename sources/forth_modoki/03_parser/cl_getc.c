@@ -35,20 +35,14 @@ char* cl_strncpy(char *dest, const char *src, size_t n) {
 }
 
 int cl_strcmp(const char *s1, const char *s2) {
-   size_t s1_len = cl_strlen(s1);
-   size_t s2_len = cl_strlen(s2);
    int i = 0;
-   if (s1_len > s2_len) {
-      return 1;
-   } else if (s1_len < s2_len) {
-      return -1;
-   } else {
-      for (i = 0; i < s1_len; i++) {
-	 if (s1[i] > s2[i])
-	    return 1;
-	 else if (s1[i] < s2[i])
-	    return -1;
-      }
-      return 0;
+   while (s1[i] != 0 && s2[i] != 0) {
+      if (s1[i] > s2[i])
+	 return 1;
+      else if (s1[i] < s2[i])
+	 return -1;
+      else
+	 i++;
    }
+   return 0;
 }

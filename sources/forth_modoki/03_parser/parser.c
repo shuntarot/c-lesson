@@ -86,6 +86,7 @@ int parse_one(int prev_ch, struct Token *out_token) {
       while (is_alnum(ch = cl_getc())) {
          name[i++] = ch;
       }
+      name[i] = '\0';
       out_token->ltype = EXECUTABLE_NAME;
       out_token->u.name = malloc(i);
       cl_strncpy(out_token->u.name, name, i);
@@ -97,6 +98,7 @@ int parse_one(int prev_ch, struct Token *out_token) {
       while (is_alnum(ch = cl_getc())) {
          name[i++] = ch;
       }
+      name[i] = '\0';
       out_token->ltype = LITERAL_NAME;
       out_token->u.name = malloc(i);
       cl_strncpy(out_token->u.name, name, i);
@@ -171,7 +173,7 @@ static void stack_clear() {
 }
 
 static int streq(const char *s1, const char *s2) {
-   return (strcmp(s1, s2) == 0);
+   return (cl_strcmp(s1, s2) == 0);
 }
 
 static void assert_streq(const char *s1, const char *s2) {
@@ -240,12 +242,19 @@ static void test_parse_one_literal_name() {
    assert_streq(token.u.name, expect_name);
 }
 
+static void test_cl_strcmp() {
+   assert(cl_strcmp("abc", "z"  ) == strcmp("abc", "z"  ));
+   assert(cl_strcmp("abc", "abc") == strcmp("abc", "abc"));
+   assert(cl_strcmp("z"  , "abc") == strcmp("z"  , "abc"));
+}
+
 static void unit_tests() {
    stack_clear();
    test_parse_one_empty_should_return_END_OF_FILE();
    test_parse_one_number();
    test_parse_one_executable_name();
    test_parse_one_literal_name();
+   test_cl_strcmp();
 }
 
 int main() {
