@@ -88,19 +88,18 @@ int parse_one(int prev_ch, struct Token *out_token) {
       }
       out_token->ltype = EXECUTABLE_NAME;
       out_token->u.name = malloc(i);
-      strncpy(out_token->u.name, name, i);
+      cl_strncpy(out_token->u.name, name, i);
       return ch;
    }
 
    if (prev_ch == '/') {
-      char name[NAME_SIZE] = "";
       int i = 0;
       while (is_alnum(ch = cl_getc())) {
          name[i++] = ch;
       }
       out_token->ltype = LITERAL_NAME;
       out_token->u.name = malloc(i);
-      strncpy(out_token->u.name, name, i);
+      cl_strncpy(out_token->u.name, name, i);
       return ch;
    }
 
