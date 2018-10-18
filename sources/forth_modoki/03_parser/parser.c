@@ -10,7 +10,7 @@ enum LexicalType {
     EXECUTABLE_NAME,
     LITERAL_NAME,
     OPEN_CURLY,
-    CLOSE_CURLY, 
+    CLOSE_CURLY,
     END_OF_FILE,
     UNKNOWN
 };
@@ -47,10 +47,10 @@ static int is_alnum(const int ch) {
 }
 
 int parse_one(int prev_ch, struct Token *out_token) {
-   
+
    // TODO: Implement here!
    int ch = 0;
-      
+
    if (prev_ch == EOF) {
       prev_ch = cl_getc();
    }
@@ -58,23 +58,23 @@ int parse_one(int prev_ch, struct Token *out_token) {
    if (is_number(prev_ch)) {
       int val = prev_ch - '0';
       do {
-	 ch = cl_getc();
-	 if (is_number(ch)) {
-	    val *= 10;
-	    val += ch - '0';
-	 }
+         ch = cl_getc();
+         if (is_number(ch)) {
+            val *= 10;
+            val += ch - '0';
+         }
       } while (is_number(ch));
-      
+
       out_token->ltype = NUMBER;
       out_token->u.number = val;
       return ch;
    }
-   
+
    if (prev_ch == ' ') {
       do {
-	 ch = cl_getc();
+         ch = cl_getc();
       } while (ch == ' ');
-      
+
       out_token->ltype = SPACE;
       return ch;
    }
@@ -84,7 +84,7 @@ int parse_one(int prev_ch, struct Token *out_token) {
       int i = 0;
       name[i++] = prev_ch;
       while (is_alnum(ch = cl_getc())) {
-	 name[i++] = ch;
+         name[i++] = ch;
       }
       out_token->ltype = EXECUTABLE_NAME;
       out_token->u.name = name;
@@ -95,7 +95,7 @@ int parse_one(int prev_ch, struct Token *out_token) {
       char name[NAME_SIZE] = "";
       int i = 0;
       while (is_alnum(ch = cl_getc())) {
-	 name[i++] = ch;
+         name[i++] = ch;
       }
       out_token->ltype = LITERAL_NAME;
       out_token->u.name = name;
@@ -113,8 +113,8 @@ int parse_one(int prev_ch, struct Token *out_token) {
       out_token->u.onechar = '}';
       return cl_getc();
    }
-   
-   if (ch == '\0') {
+
+   if (prev_ch == EOF) {
       out_token->ltype = END_OF_FILE;
       return EOF;
    }
@@ -164,6 +164,10 @@ void parser_print_all() {
 
 
 
+static void stack_clear() {
+   char dummy[1024] = {' '};
+   printf("%x\n", dummy[1023]);
+}
 
 
 static void test_parse_one_number() {
@@ -209,7 +213,7 @@ static void test_parse_one_executable_name() {
 
    assert(ch == EOF);
    assert(token.ltype  == expect_type);
-   assert(*(token.u.name) == *expect_name);
+   assert(strcmp(token.u.name, expect_name) == 0);
 }
 
 static void test_parse_one_literal_name() {
@@ -225,20 +229,20 @@ static void test_parse_one_literal_name() {
 
    assert(ch == EOF);
    assert(token.ltype  == expect_type);
-   assert(*(token.u.name) == *expect_name);
+   assert(strcmp(token.u.name, expect_name) == 0);
 }
 
-
 static void unit_tests() {
-    test_parse_one_empty_should_return_END_OF_FILE();
-    test_parse_one_number();
-    test_parse_one_executable_name();
-    test_parse_one_literal_name();
+   stack_clear();
+   test_parse_one_empty_should_return_END_OF_FILE();
+   test_parse_one_number();
+   test_parse_one_executable_name();
+   test_parse_one_literal_name();
 }
 
 int main() {
     unit_tests();
     cl_getc_set_src("123 45 add /some { 2 3 add } def");
-    parser_print_all();
+//    parser_print_all();
     return 1;
 }
