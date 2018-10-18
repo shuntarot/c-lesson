@@ -50,6 +50,7 @@ int parse_one(int prev_ch, struct Token *out_token) {
 
    // TODO: Implement here!
    int ch = 0;
+   char name[NAME_SIZE];
 
    if (prev_ch == EOF) {
       prev_ch = cl_getc();
@@ -80,14 +81,14 @@ int parse_one(int prev_ch, struct Token *out_token) {
    }
 
    if (is_alpha(prev_ch)) {
-      char name[NAME_SIZE] = "";
       int i = 0;
       name[i++] = prev_ch;
       while (is_alnum(ch = cl_getc())) {
          name[i++] = ch;
       }
       out_token->ltype = EXECUTABLE_NAME;
-      out_token->u.name = name;
+      out_token->u.name = malloc(i);
+      strncpy(out_token->u.name, name, i);
       return ch;
    }
 
@@ -98,7 +99,8 @@ int parse_one(int prev_ch, struct Token *out_token) {
          name[i++] = ch;
       }
       out_token->ltype = LITERAL_NAME;
-      out_token->u.name = name;
+      out_token->u.name = malloc(i);
+      strncpy(out_token->u.name, name, i);
       return ch;
    }
 
@@ -166,7 +168,7 @@ void parser_print_all() {
 
 static void stack_clear() {
    char dummy[1024] = {' '};
-   printf("%x\n", dummy[1023]);
+   printf("clear stack %x\n", dummy[1023]);
 }
 
 
@@ -243,6 +245,6 @@ static void unit_tests() {
 int main() {
     unit_tests();
     cl_getc_set_src("123 45 add /some { 2 3 add } def");
-//    parser_print_all();
+    parser_print_all();
     return 1;
 }
