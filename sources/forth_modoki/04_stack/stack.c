@@ -23,7 +23,7 @@ void stack_pop(stack_data_t* out_data) {
    }
 }
 
-void stack_print(stack_data_t* data) {
+void stack_print(const stack_data_t* data) {
    if (data->ltype == NUMBER) {
       printf("%d\n", data->u.number);
    } else if (data->ltype == LITERAL_NAME) {

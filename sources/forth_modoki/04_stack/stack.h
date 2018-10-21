@@ -18,6 +18,6 @@ void stack_push(stack_data_t* data);
 
 void stack_pop(stack_data_t* out_data);
 
-void stack_print(stack_data_t* data);
+void stack_print(const stack_data_t* data);
 
 void stack_print_all();
