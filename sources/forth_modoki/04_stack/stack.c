@@ -10,20 +10,20 @@ static int sp = 0;
 int stack_push(const stack_data_t* data) {
    if (sp == STACK_SIZE) {
       printf("Stack is full!\n");
-      return 1;
+      return 0;
    } else {
       stack[sp++] = *data;
-      return 0;
+      return 1;
    }
 }
 
 int stack_pop(stack_data_t* out_data) {
    if (sp == 0) {
       printf("Stack is empty!\n");
-      return 1;
+      return 0;
    } else {
       *out_data = stack[--sp];
-      return 0;
+      return 1;
    }
 }
 
@@ -78,7 +78,7 @@ static void assert_streq(const char* a, const char* b) {
 
 static void test_pop_empty() {
    stack_data_t input = {UNKNOWN, {0}};
-   int expect = 1;
+   int expect = 0;
    
    int actual = stack_pop(&input);
    assert(actual == expect);
@@ -95,7 +95,6 @@ static void test_push() {
    
    stack_push(&input1);
    stack_push(&input2);
-   stack_print_all();
 
    stack_data_t actual1 = stack[0];
    stack_data_t actual2 = stack[1];
@@ -107,16 +106,10 @@ static void test_push() {
 }
 
 static void test_push_name() {
-   char* input_name = malloc(sizeof("add"));
-   input_name = "add";
-   stack_data_t input = {.ltype = LITERAL_NAME, .u.name = input_name};
-
-   char* expect_name = malloc(sizeof("add"));
-   expect_name = "add";
-   stack_data_t expect = {.ltype = LITERAL_NAME, .u.name = expect_name};
+   stack_data_t input  = {.ltype = LITERAL_NAME, .u.name = "add"};
+   stack_data_t expect = {.ltype = LITERAL_NAME, .u.name = "add"};
 
    stack_push(&input);
-   stack_print_all();
 
    stack_data_t actual = stack[0];
    
@@ -132,7 +125,6 @@ static void test_pop_one() {
    assert_stack_not_eq(&actual, &expect);
    
    stack_push(&input);
-   stack_print_all();
    stack_pop(&actual);
 
    assert_stack_eq(&actual, &expect);
@@ -141,28 +133,17 @@ static void test_pop_one() {
 }
 
 static void test_push_mult_name() {
-   char* name[2] = {"sub", "Hello-World"};
-   
-   char* input_name1 = malloc(sizeof(name[0]));
-   char* input_name2 = malloc(sizeof(name[1]));
-   input_name1 = name[0];
-   input_name2 = name[1];
-   stack_data_t input1 = {.ltype = LITERAL_NAME, .u.name = input_name1};
-   stack_data_t input2 = {.ltype = LITERAL_NAME, .u.name = input_name2};
+   stack_data_t input1 = {.ltype = LITERAL_NAME, .u.name = "sub"};
+   stack_data_t input2 = {.ltype = LITERAL_NAME, .u.name = "Hello-World"};
    stack_data_t input3 = {.ltype = NUMBER, .u.number = 100};
 
-   char* expect_name1 = malloc(sizeof(name[0]));
-   char* expect_name2 = malloc(sizeof(name[1]));
-   expect_name1 = name[0];
-   expect_name2 = name[1];
-   stack_data_t expect1 = {.ltype = LITERAL_NAME, .u.name = expect_name1};
-   stack_data_t expect2 = {.ltype = LITERAL_NAME, .u.name = expect_name2};
+   stack_data_t expect1 = {.ltype = LITERAL_NAME, .u.name = "sub"};
+   stack_data_t expect2 = {.ltype = LITERAL_NAME, .u.name = "Hello-World"};
    stack_data_t expect3 = {.ltype = NUMBER, .u.number = 100};
    
    stack_push(&input1);
    stack_push(&input2);
    stack_push(&input3);
-   stack_print_all();
 
    assert_stack_eq(&stack[0], &expect1);
    assert_stack_eq(&stack[1], &expect2);
@@ -190,7 +171,7 @@ static void test_push_at_full() {
    int i;
    stack_data_t input  = {NUMBER, {999}};
    int  expect1 = STACK_SIZE;
-   int  expect2 = 1;
+   int  expect2 = 0;
 
    for (i = sp; i < STACK_SIZE; i++) {
       stack_push(&input);
