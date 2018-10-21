@@ -14,10 +14,10 @@ typedef struct stack_data {
    } u;
 } stack_data_t;
 
-void stack_push(stack_data_t* data);
+int stack_push(const stack_data_t* data);
 
-void stack_pop(stack_data_t* out_data);
+int stack_pop(stack_data_t* out_data);
 
-void stack_print(const stack_data_t* data);
+void stack_print(const stack_data_t* const data);
 
 void stack_print_all();
