@@ -1,4 +1,5 @@
 #include "clesson.h"
+#include "stack.h"
 
 void eval() {}
 
@@ -35,7 +36,7 @@ static void test_eval_num_two() {
 }
 
 
-static void test_eval_add() {
+static void test_eval_num_add() {
     char *input = "1 2 add";
     int expect = 3;
 
@@ -53,6 +54,5 @@ int main() {
     test_eval_num_one();
     test_eval_num_two();
     test_eval_num_add();
-
     return 1;
 }
