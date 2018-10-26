@@ -1,13 +1,9 @@
-#include "stack.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
+#include "clesson.h"
 
-static stack_data_t stack[STACK_SIZE];
+static Token_t stack[STACK_SIZE];
 static int sp = 0;
 
-int stack_push(const stack_data_t* data) {
+int stack_push(const Token_t* data) {
    if (sp == STACK_SIZE) {
       printf("Stack is full!\n");
       return 0;
@@ -17,7 +13,7 @@ int stack_push(const stack_data_t* data) {
    }
 }
 
-int stack_pop(stack_data_t* out_data) {
+int stack_pop(Token_t* out_data) {
    if (sp == 0) {
       printf("Stack is empty!\n");
       return 0;
@@ -27,7 +23,7 @@ int stack_pop(stack_data_t* out_data) {
    }
 }
 
-void stack_print(const stack_data_t* const data) {
+void stack_print(const Token_t* const data) {
    if (data->ltype == NUMBER) {
       printf("%d\n", data->u.number);
    } else if (data->ltype == LITERAL_NAME) {
@@ -51,7 +47,7 @@ static void stack_clear() {
    sp = 0;
 }
 
-static int stack_eq(const stack_data_t* a, const stack_data_t* b) {
+static int stack_eq(const Token_t* a, const Token_t* b) {
 
    if (a->ltype == b->ltype) {
       if (a->ltype == NUMBER) {
@@ -64,11 +60,11 @@ static int stack_eq(const stack_data_t* a, const stack_data_t* b) {
    return 0;
 }
 
-static void assert_stack_eq(const stack_data_t* actual, const stack_data_t* expect) {
+static void assert_stack_eq(const Token_t* actual, const Token_t* expect) {
    assert(stack_eq(actual, expect));
 }
 
-static void assert_stack_not_eq(const stack_data_t* actual, const stack_data_t* expect) {
+static void assert_stack_not_eq(const Token_t* actual, const Token_t* expect) {
    assert(stack_eq(actual, expect) == 0);
 }
 
@@ -77,7 +73,7 @@ static void assert_streq(const char* a, const char* b) {
 }
 
 static void test_pop_empty() {
-   stack_data_t input = {UNKNOWN, {0}};
+   Token_t input = {UNKNOWN, {0}};
    int expect = 0;
    
    int actual = stack_pop(&input);
@@ -87,17 +83,17 @@ static void test_pop_empty() {
 }
 
 static void test_push() {
-   stack_data_t input1  = {NUMBER, {1}};
-   stack_data_t input2  = {NUMBER, {321}};
+   Token_t input1  = {NUMBER, {1}};
+   Token_t input2  = {NUMBER, {321}};
    
-   stack_data_t expect1 = {NUMBER, {1}};
-   stack_data_t expect2 = {NUMBER, {321}};
+   Token_t expect1 = {NUMBER, {1}};
+   Token_t expect2 = {NUMBER, {321}};
    
    stack_push(&input1);
    stack_push(&input2);
 
-   stack_data_t actual1 = stack[0];
-   stack_data_t actual2 = stack[1];
+   Token_t actual1 = stack[0];
+   Token_t actual2 = stack[1];
 
    assert_stack_eq(&actual1, &expect1);
    assert_stack_eq(&actual2, &expect2);
@@ -106,21 +102,21 @@ static void test_push() {
 }
 
 static void test_push_name() {
-   stack_data_t input  = {.ltype = LITERAL_NAME, .u.name = "add"};
-   stack_data_t expect = {.ltype = LITERAL_NAME, .u.name = "add"};
+   Token_t input  = {.ltype = LITERAL_NAME, .u.name = "add"};
+   Token_t expect = {.ltype = LITERAL_NAME, .u.name = "add"};
 
    stack_push(&input);
 
-   stack_data_t actual = stack[0];
+   Token_t actual = stack[0];
    
    assert_stack_eq(&actual, &expect);
    stack_clear();
 }
 
 static void test_pop_one() {
-   stack_data_t input  = {NUMBER, {555}};
-   stack_data_t expect = {NUMBER, {555}};
-   stack_data_t actual = {UNKNOWN, {0}};
+   Token_t input  = {NUMBER, {555}};
+   Token_t expect = {NUMBER, {555}};
+   Token_t actual = {UNKNOWN, {0}};
 
    assert_stack_not_eq(&actual, &expect);
    
@@ -133,13 +129,13 @@ static void test_pop_one() {
 }
 
 static void test_push_mult_name() {
-   stack_data_t input1 = {.ltype = LITERAL_NAME, .u.name = "sub"};
-   stack_data_t input2 = {.ltype = LITERAL_NAME, .u.name = "Hello-World"};
-   stack_data_t input3 = {.ltype = NUMBER, .u.number = 100};
+   Token_t input1 = {.ltype = LITERAL_NAME, .u.name = "sub"};
+   Token_t input2 = {.ltype = LITERAL_NAME, .u.name = "Hello-World"};
+   Token_t input3 = {.ltype = NUMBER, .u.number = 100};
 
-   stack_data_t expect1 = {.ltype = LITERAL_NAME, .u.name = "sub"};
-   stack_data_t expect2 = {.ltype = LITERAL_NAME, .u.name = "Hello-World"};
-   stack_data_t expect3 = {.ltype = NUMBER, .u.number = 100};
+   Token_t expect1 = {.ltype = LITERAL_NAME, .u.name = "sub"};
+   Token_t expect2 = {.ltype = LITERAL_NAME, .u.name = "Hello-World"};
+   Token_t expect3 = {.ltype = NUMBER, .u.number = 100};
    
    stack_push(&input1);
    stack_push(&input2);
@@ -148,9 +144,9 @@ static void test_push_mult_name() {
    assert_stack_eq(&stack[0], &expect1);
    assert_stack_eq(&stack[1], &expect2);
 
-   stack_data_t actual1 = {UNKNOWN, {0}};
-   stack_data_t actual2 = {UNKNOWN, {0}};
-   stack_data_t actual3 = {UNKNOWN, {0}};
+   Token_t actual1 = {UNKNOWN, {0}};
+   Token_t actual2 = {UNKNOWN, {0}};
+   Token_t actual3 = {UNKNOWN, {0}};
 
    assert_stack_not_eq(&actual1, &expect1);
    assert_stack_not_eq(&actual2, &expect2);
@@ -169,7 +165,7 @@ static void test_push_mult_name() {
 
 static void test_push_at_full() {
    int i;
-   stack_data_t input  = {NUMBER, {999}};
+   Token_t input  = {NUMBER, {999}};
    int  expect1 = STACK_SIZE;
    int  expect2 = 0;
 

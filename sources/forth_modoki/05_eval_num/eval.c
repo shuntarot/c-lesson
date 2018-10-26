@@ -1,5 +1,4 @@
 #include "clesson.h"
-#include "stack.h"
 
 void eval() {}
 
