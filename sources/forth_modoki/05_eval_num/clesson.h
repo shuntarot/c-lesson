@@ -47,6 +47,9 @@ void stack_clear();
 
 int parse_one(int prev_ch, Token_t *out_token);
 
+int streq(const char *s1, const char *s2);
+
+
 /*
 return one character and move cursor.
 return EOF if end of file.

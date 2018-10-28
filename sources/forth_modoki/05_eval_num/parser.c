@@ -144,7 +144,7 @@ static void local_stack_clear() {
    printf("clear stack %x\n", dummy[1023]);
 }
 
-static int streq(const char *s1, const char *s2) {
+int streq(const char *s1, const char *s2) {
    return (cl_strcmp(s1, s2) == 0);
 }
 

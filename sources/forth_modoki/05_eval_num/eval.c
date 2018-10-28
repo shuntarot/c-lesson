@@ -3,6 +3,8 @@
 void eval() {
    int ch = EOF;
    Token_t token = {UNKNOWN, {0}};
+   Token_t token_t1 = {UNKNOWN, {0}};
+   Token_t token_t2 = {UNKNOWN, {0}};
 
    do {
       ch = parse_one(ch, &token);
@@ -11,6 +13,16 @@ void eval() {
          switch (token.ltype) {
             case NUMBER:
                /* printf("num: %d\n", token.u.number); */
+               stack_push(&token);
+               break;
+            case EXECUTABLE_NAME:
+               /* printf("EXECUTABLE_NAME: %s\n", token.u.name); */
+               if (streq(token.u.name, "add")) {
+                  stack_pop(&token_t1);
+                  stack_pop(&token_t2);
+                  token.ltype = NUMBER;
+                  token.u.number = token_t1.u.number + token_t2.u.number;
+               }
                stack_push(&token);
                break;
 
@@ -71,14 +83,25 @@ static void test_eval_num_add() {
     eval();
 
     /* TODO: write code to pop stack top element */
-    int actual = 0;
+    Token_t token = {UNKNOWN, {0}};
+    assert(stack_pop(&token) == 1);
+    int actual = token.u.number;
     assert(expect == actual);
+    stack_clear();
 }
 
 
 int main() {
     test_eval_num_one();
     test_eval_num_two();
-    /* test_eval_num_add(); */
+    test_eval_num_add();
+
+    cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add");
+
+    eval();
+    Token_t token = {UNKNOWN, {0}};
+    stack_pop(&token);
+    printf("result: %d\n", token.u.number);
+
     return 1;
 }
