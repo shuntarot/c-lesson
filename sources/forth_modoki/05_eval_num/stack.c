@@ -43,7 +43,7 @@ void stack_print_all() {
 // Test
 //
 
-static void stack_clear() {
+void stack_clear() {
    sp = 0;
 }
 

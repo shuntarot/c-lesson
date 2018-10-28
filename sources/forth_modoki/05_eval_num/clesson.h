@@ -27,6 +27,10 @@ typedef struct Token {
 #define STACK_SIZE 1024
 #define NAME_SIZE  256
 
+//
+// stack
+//
+
 int stack_push(const Token_t* data);
 
 int stack_pop(Token_t* out_data);
@@ -34,6 +38,14 @@ int stack_pop(Token_t* out_data);
 void stack_print(const Token_t* const data);
 
 void stack_print_all();
+
+void stack_clear();
+
+//
+// parse
+//
+
+int parse_one(int prev_ch, Token_t *out_token);
 
 /*
 return one character and move cursor.
