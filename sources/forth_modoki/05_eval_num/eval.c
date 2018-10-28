@@ -34,6 +34,16 @@ void eval() {
    } while(ch != EOF);
 }
 
+//
+// Unit test
+//
+
+static void assert_token_number(int expect, Token_t *actual) {
+   stack_pop(actual);
+   assert(actual->ltype == NUMBER);
+   assert(actual->u.number == expect);
+}
+
 static void test_eval_num_one() {
     char *input = "123";
     int expect = 123;
@@ -43,11 +53,9 @@ static void test_eval_num_one() {
     eval();
 
     /* TODO: write code to pop stack top element */
-    Token_t token = {UNKNOWN, {0}};
-    assert(stack_pop(&token) == 1);
-    int actual = token.u.number;
+    Token_t actual = {UNKNOWN, {0}};
+    assert_token_number(expect, &actual);
 
-    assert(expect == actual);
     stack_clear();
 }
 
@@ -61,15 +69,11 @@ static void test_eval_num_two() {
     eval();
 
     /* TODO: write code to pop stack top and second top element */
-    Token_t token = {UNKNOWN, {0}};
+    Token_t actual1 = {UNKNOWN, {0}};
+    Token_t actual2 = {UNKNOWN, {0}};
+    assert_token_number(expect1, &actual1);
+    assert_token_number(expect2, &actual2);
 
-    assert(stack_pop(&token) == 1);
-    int actual1 = token.u.number;
-    assert(stack_pop(&token) == 1);
-    int actual2 = token.u.number;
-
-    assert(expect1 == actual1);
-    assert(expect2 == actual2);
     stack_clear();
 }
 
@@ -83,13 +87,15 @@ static void test_eval_num_add() {
     eval();
 
     /* TODO: write code to pop stack top element */
-    Token_t token = {UNKNOWN, {0}};
-    assert(stack_pop(&token) == 1);
-    int actual = token.u.number;
-    assert(expect == actual);
+    Token_t actual = {UNKNOWN, {0}};
+    assert_token_number(expect, &actual);
+
     stack_clear();
 }
 
+//
+// main
+//
 
 int main() {
     test_eval_num_one();
