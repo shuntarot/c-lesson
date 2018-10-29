@@ -1,32 +1,4 @@
 #include "clesson.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-
-enum LexicalType {
-    NUMBER,
-    SPACE,
-    EXECUTABLE_NAME,
-    LITERAL_NAME,
-    OPEN_CURLY,
-    CLOSE_CURLY,
-    END_OF_FILE,
-    UNKNOWN
-};
-
-
-
-struct Token {
-    enum LexicalType ltype;
-    union {
-        int number;
-        char onechar;
-        char *name;
-    } u;
-};
-
-#define NAME_SIZE 256
 
 static int is_number(const int ch) {
    if ('0' <= ch && ch <= '9')
@@ -46,7 +18,7 @@ static int is_alnum(const int ch) {
    return is_alpha(ch) || is_number(ch);
 }
 
-int parse_one(int prev_ch, struct Token *out_token) {
+int parse_one(int prev_ch, Token_t *out_token) {
 
    // TODO: Implement here!
    int ch = 0;
@@ -129,7 +101,7 @@ int parse_one(int prev_ch, struct Token *out_token) {
 
 void parser_print_all() {
     int ch = EOF;
-    struct Token token = {
+    Token_t token = {
         UNKNOWN,
         {0}
     };
@@ -167,12 +139,12 @@ void parser_print_all() {
 
 
 
-static void stack_clear() {
+static void local_stack_clear() {
    char dummy[1024] = {' '};
    printf("clear stack %x\n", dummy[1023]);
 }
 
-static int streq(const char *s1, const char *s2) {
+int streq(const char *s1, const char *s2) {
    return (cl_strcmp(s1, s2) == 0);
 }
 
@@ -184,7 +156,7 @@ static void test_parse_one_number() {
     char *input = "123";
     int expect = 123;
 
-    struct Token token = {UNKNOWN, {0}};
+    Token_t token = {UNKNOWN, {0}};
     int ch;
 
     cl_getc_set_src(input);
@@ -200,7 +172,7 @@ static void test_parse_one_empty_should_return_END_OF_FILE() {
     char *input = "";
     int expect = END_OF_FILE;
 
-    struct Token token = {UNKNOWN, {0}};
+    Token_t token = {UNKNOWN, {0}};
     int ch;
 
     cl_getc_set_src(input);
@@ -215,7 +187,7 @@ static void test_parse_one_executable_name() {
    char* expect_name = "add";
    int expect_type = EXECUTABLE_NAME;
 
-   struct Token token = {UNKNOWN, {0}};
+   Token_t token = {UNKNOWN, {0}};
    int ch;
 
    cl_getc_set_src(input);
@@ -231,7 +203,7 @@ static void test_parse_one_literal_name() {
    char* expect_name = "add";
    int expect_type = LITERAL_NAME;
 
-   struct Token token = {UNKNOWN, {0}};
+   Token_t token = {UNKNOWN, {0}};
    int ch;
 
    cl_getc_set_src(input);
@@ -249,7 +221,7 @@ static void test_cl_strcmp() {
 }
 
 static void unit_tests() {
-   stack_clear();
+   local_stack_clear();
    test_parse_one_empty_should_return_END_OF_FILE();
    test_parse_one_number();
    test_parse_one_executable_name();
@@ -257,9 +229,11 @@ static void unit_tests() {
    test_cl_strcmp();
 }
 
+#if 0
 int main() {
    unit_tests();
    cl_getc_set_src("123 45 add /some { 2 3 add } def");
    parser_print_all();
    return 1;
 }
+#endif
