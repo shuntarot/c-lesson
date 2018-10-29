@@ -25,6 +25,9 @@ void eval() {
                }
                stack_push(&token);
                break;
+            case LITERAL_NAME:
+               printf("LITERAL_NAME: %s\n", token.u.name);
+               break;
 
             default:
                /* printf("Unknown type %d\n", token.ltype); */
@@ -92,7 +95,22 @@ static void test_eval_num_add() {
     Token_t actual = {UNKNOWN, {0}};
     stack_pop(&actual);
     assert_token_number(expect, &actual);
-    
+
+    stack_clear();
+}
+
+static void test_eval_literal() {
+    char *input = "/hoge 432 def hoge";
+    int expect = 432;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    Token_t actual = {UNKNOWN, {0}};
+    stack_pop(&actual);
+    assert_token_number(expect, &actual);
+
     stack_clear();
 }
 
@@ -104,13 +122,14 @@ int main() {
     test_eval_num_one();
     test_eval_num_two();
     test_eval_num_add();
+    test_eval_literal();
 
-    cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add");
+    /* cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); */
 
-    eval();
-    Token_t token = {UNKNOWN, {0}};
-    stack_pop(&token);
-    printf("result: %d\n", token.u.number);
+    /* eval(); */
+    /* Token_t token = {UNKNOWN, {0}}; */
+    /* stack_pop(&token); */
+    /* printf("result: %d\n", token.u.number); */
 
     return 1;
 }

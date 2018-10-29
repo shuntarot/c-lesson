@@ -42,6 +42,16 @@ void stack_print_all();
 void stack_clear();
 
 //
+// dictionary
+//
+
+void dict_put(char* key, Token_t* elem);
+
+int dict_get(char* key, Token_t* out_elem);
+
+void dict_print_all();
+
+//
 // parse
 //
 
