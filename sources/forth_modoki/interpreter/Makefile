@@ -11,7 +11,6 @@ $(TARGET): $(SRCS)
 dict: cl_getc.c dict.c parser.c clesson.h
 	$(CC) -g -DTEST_DICT $^ -o $@
 
-
 memcheck:
 	valgrind --leak-check=full ./$(TARGET)
 
