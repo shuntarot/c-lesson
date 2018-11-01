@@ -12,7 +12,7 @@ void eval() {
 
          switch (token.ltype) {
             case NUMBER:
-               /* printf("num: %d\n", token.u.number); */
+               /* printf("NUMBER: %d\n", token.u.number); */
                stack_push(&token);
                break;
             case EXECUTABLE_NAME:
@@ -22,11 +22,20 @@ void eval() {
                   stack_pop(&token_t2);
                   token.ltype = NUMBER;
                   token.u.number = token_t1.u.number + token_t2.u.number;
+                  stack_push(&token);
+               } else if (streq(token.u.name, "def")) {
+                  stack_pop(&token_t1);
+                  stack_pop(&token_t2);
+                  dict_put(token_t2.u.name, &token_t1);
+               } else if (dict_get(token.u.name, &token)) {
+                  stack_push(&token);
+               } else {
+                  stack_push(&token);
                }
-               stack_push(&token);
                break;
             case LITERAL_NAME:
-               printf("LITERAL_NAME: %s\n", token.u.name);
+               /* printf("LITERAL_NAME: %s\n", token.u.name); */
+               stack_push(&token);
                break;
 
             default:
@@ -125,11 +134,12 @@ int main() {
     test_eval_literal();
 
     /* cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); */
+    cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar  add");
 
-    /* eval(); */
-    /* Token_t token = {UNKNOWN, {0}}; */
-    /* stack_pop(&token); */
-    /* printf("result: %d\n", token.u.number); */
+    eval();
+    Token_t token = {UNKNOWN, {0}};
+    stack_pop(&token);
+    printf("result: %d\n", token.u.number);
 
     return 1;
 }

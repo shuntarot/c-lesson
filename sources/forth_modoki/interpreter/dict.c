@@ -7,7 +7,7 @@ struct KeyValue {
 };
 static struct KeyValue dict_array[1024];
 
-static int dict_find(char* key, int* out_pos) {
+int dict_find(char* key, int* out_pos) {
    int i;
    for (i = 0; i < dict_pos; i++) {
       if (streq(key, dict_array[i].key)) {
@@ -43,6 +43,10 @@ int dict_get(char* key, Token_t* out_elem) {
 }
 
 void dict_print_all() {
+   printf("---\n");
+   for (int i = 0; i < dict_pos; i++) {
+      printf("key: %s\n", dict_array[i].key);
+   }
 }
 
 //

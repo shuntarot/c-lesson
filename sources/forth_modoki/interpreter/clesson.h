@@ -49,6 +49,8 @@ void dict_put(char* key, Token_t* elem);
 
 int dict_get(char* key, Token_t* out_elem);
 
+int dict_find(char* key, int* out_pos);
+
 void dict_print_all();
 
 //
