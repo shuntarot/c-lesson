@@ -33,7 +33,8 @@ void stack_print(const Token_t* const data) {
 
 void stack_print_all() {
    printf("---\n");
-   for (int i = 0; i < sp; i++) {
+   int i = 0;
+   for (i = 0; i < sp; i++) {
       printf("%3d: ", i);
       stack_print(&stack[i]);
    }
