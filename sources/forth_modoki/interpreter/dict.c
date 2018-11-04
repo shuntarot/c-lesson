@@ -46,7 +46,13 @@ void dict_print_all() {
    printf("---\n");
    int i = 0;
    for (i = 0; i < dict_pos; i++) {
-      printf("key: %s\n", dict_array[i].key);
+     if (dict_array[i].value.ltype == NUMBER) {
+       printf("key: %s\t%d\n", dict_array[i].key, dict_array[i].value.u.number);
+     } else if (dict_array[i].value.ltype == LITERAL_NAME) {
+       printf("key: %s\t%s\n", dict_array[i].key, dict_array[i].value.u.name);
+     } else {
+       printf("key: %s\n", dict_array[i].key);
+     }
    }
 }
 
@@ -103,10 +109,54 @@ static void test_dict_get() {
    dict_clear();
 }
 
+static int kv_init(struct KeyValue* kv_array, int num) {
+   int i;
+   kv_array[0].key = "foo";
+   kv_array[0].value.ltype = NUMBER;
+   kv_array[0].value.u.number = 123;
+   kv_array[1].key = "bar";
+   kv_array[1].value.ltype = NUMBER;
+   kv_array[1].value.u.number = 65;
+   kv_array[2].key = "toto";
+   kv_array[2].value.ltype = NUMBER;
+   kv_array[2].value.u.number = 1000;
+   kv_array[3].key = "puda";
+   kv_array[3].value.ltype = LITERAL_NAME;
+   kv_array[3].value.u.name = "compile"; // [TODO] Need malloc?
+   kv_array[4].key = "shaa";
+   kv_array[4].value.ltype = LITERAL_NAME;
+   kv_array[4].value.u.name = "run";     // [TODO] Need malloc?
+   return 5;
+}
+
+static void test_dict_mult() {
+   struct KeyValue input[10];
+   int i;
+   int x;
+   int uniq_num;
+   uniq_num = kv_init(input, 10);
+   for (i = 0; i < 10; i++) {
+      x = i % uniq_num;
+      dict_put(input[x].key, &input[x].value);
+   }
+
+   /* dict_print_all(); */
+
+   struct KeyValue actual;
+   for (i = 0; i < uniq_num; i++) {
+      actual.key = input[i].key;
+      dict_get(actual.key, &actual.value);
+      assert_dict_eq(&actual, &input[i]);
+   }
+
+   dict_clear();
+}
+
 #ifdef TEST_DICT
 int main() {
    test_dict_put();
    test_dict_get();
+   test_dict_mult();
    return 1;
 }
 #endif
