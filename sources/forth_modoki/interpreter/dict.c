@@ -6,7 +6,7 @@ typedef struct Node {
    struct Node* next;
 } Node_t;
 
-#define TABLE_SIZE 1024
+#define TABLE_SIZE 32
 
 static Node_t* array[TABLE_SIZE];
 
@@ -33,31 +33,47 @@ static int hash(char *str) {
 /*    dict_pos = 0; */
 /* } */
 
-static void dict_update(Node_t* head, char* key, Token_t* value) {
+static Node_t* dict_new(char* key, Token_t* value) {
+   Node_t* head = malloc(sizeof(Node_t));
    head->next = NULL;
    head->key = key;
    head->value = *value;
+   return head;
 }
 
-void dict_put(char* key, Token_t* elem) {
+static void dict_update(Node_t* head, char* key, Token_t* value) {
+   do {
+      printf("upd %p %s %s\n", head, head->key, key);
+      if (strcmp(head->key, key) == 0) { // match, set value to this node
+	 head->value = *value;
+	 return;
+      } else if (head == NULL) { // end of list, add new node
+	 head = dict_new(key, value);
+	 return;
+      } else { // key missmatch go to next node
+	 head = head->next;
+      }
+   } while (1);
+   return;
+}
+
+void dict_put(char* key, Token_t* value) {
    int idx = hash(key);
    Node_t* head = array[idx];
    if (head == NULL) {
-      head = malloc(sizeof(Node_t));
-      head->next = NULL;
-      head->key = key;
-      head->value = *elem;
+      head = dict_new(key, value);
       array[idx] = head;
+      printf("put %p %s %s\n", head, head->key, key);
    } else {
-      dict_update(head, key, elem);
+      dict_update(head, key, value);
    }
 }
 
-int dict_get(char* key, Token_t* out_elem) {
+int dict_get(char* key, Token_t* out_value) {
    int idx = hash(key);
    Node_t* head = array[idx];
    if (head != NULL) {
-      *out_elem = head->value;
+      *out_value = head->value;
       return 1;
    }
    return 0;
@@ -68,11 +84,15 @@ void dict_print_all() {
    int i = 0;
    for (i = 0; i < TABLE_SIZE; i++) {
       Node_t* head = array[i];
-      if (head == NULL) {
-	 ;
-      } else {
-	 printf("key: %s\n", head->key);
+      if (head != NULL) {
+      	 printf("%d\t%s\n", i, head->key);
       }
+      /* printf("%d\t", i); */
+      /* while (head != NULL) { */
+      /* 	 printf("key: %s\t", head->key); */
+      /* 	 head = head->next; */
+      /* } */
+      /* printf("\n"); */
    }
 }
 
@@ -109,6 +129,9 @@ static void test_dict_put() {
    Node_t expect = {.key=key, {.ltype=LITERAL_NAME, .u.name=key}};
 
    dict_put(input.key, &input.value);
+
+   dict_print_all();
+   
    int idx = hash(key);
    Node_t* actual = array[idx];
    assert_dict_eq(actual, &expect);
@@ -159,7 +182,7 @@ static void test_dict_mult() {
    int x;
    int uniq_num;
    uniq_num = kv_init(input, 10);
-   for (i = 0; i < 5; i++) {
+   for (i = 0; i < 10; i++) {
       x = i % uniq_num;
       dict_put(input[x].key, &input[x].value);
    }
@@ -177,8 +200,8 @@ static void test_dict_mult() {
 #ifdef TEST_DICT
 int main() {
    test_dict_put();
-   test_dict_get();
-   test_dict_mult();
+   /* test_dict_get(); */
+   /* test_dict_mult(); */
    return 1;
 }
 #endif
