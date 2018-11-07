@@ -32,12 +32,12 @@ static Node_t* dict_new(char* key, Token_t* value) {
 
 static void dict_update(Node_t* head, char* key, Token_t* value) {
    for (;;) {
-     // printf("upd %p %s %s\n", head, head->key, key);
-      if (strcmp(head->key, key) == 0) { // match, set value to this node
-         head->value = *value;
-         return;
-      } else if (head == NULL) { // end of list, add new node
+      if (head != NULL) { printf("upd %p %s %s\n", head, head->key, key); }
+      if (head == NULL) { // end of list, add new node
          head = dict_new(key, value);
+         return;
+      } else if (strcmp(head->key, key) == 0) { // match, set value to this node
+         head->value = *value;
          return;
       } else { // key missmatch go to next node
          head = head->next;
@@ -52,7 +52,7 @@ void dict_put(char* key, Token_t* value) {
    if (head == NULL) {
       head = dict_new(key, value);
       array[idx] = head;
-      // printf("put %p to [%d] %s %s\n", head, idx, head->key, key);
+      printf("put %p to [%d] %s %s\n", head, idx, head->key, key);
    } else {
       dict_update(head, key, value);
    }
@@ -62,13 +62,13 @@ int dict_get(char* key, Token_t* out_value) {
    int idx = hash(key);
    Node_t* head = array[idx];
    for (;;) {
-      if (strcmp(head->key, key) == 0) {
-	 *out_value = head->value;
-	 return 1;
-      } else if (head == NULL) {
-	 return 0;
+      if (head == NULL) {
+         return 0;
+      } else if (strcmp(head->key, key) == 0) {
+         *out_value = head->value;
+         return 1;
       } else {
-	 head = head->next;
+         head = head->next;
       }
    }
 }
@@ -81,8 +81,9 @@ void dict_print_all() {
       printf("%d", i);
       while (head != NULL) {
          printf("\t%s", head->key);
-	 head = head->next;
+         head = head->next;
       }
+      printf("\n");
    }
    printf("-----\n");
 }
@@ -138,46 +139,59 @@ static void test_dict_get() {
    assert_dict_eq(&actual, &expect);
 }
 
-static int kv_init(Node_t* array, int num) {
+static void kv_init(Node_t* kv, int num) {
    int i;
 
-   array[0].key = "foo";
-   array[0].value.ltype = NUMBER;
-   array[0].value.u.number = 123;
-   array[1].key = "bar";
-   array[1].value.ltype = NUMBER;
-   array[1].value.u.number = 65;
-   array[2].key = "toto";
-   array[2].value.ltype = NUMBER;
-   array[2].value.u.number = 1000;
+   kv[0].key = "foo";
+   kv[0].value.ltype = NUMBER;
+   kv[0].value.u.number = 123;
+   kv[1].key = "bar";
+   kv[1].value.ltype = NUMBER;
+   kv[1].value.u.number = 65;
+   kv[2].key = "toto";
+   kv[2].value.ltype = NUMBER;
+   kv[2].value.u.number = 1000;
 
    char* name3 = malloc(strlen("compile") + 1);
    strcpy(name3, "compile");
    char* name4 = malloc(strlen("run") + 1);
    strcpy(name4, "run");
 
-   array[3].key = "puda";
-   array[3].value.ltype = LITERAL_NAME;
-   array[3].value.u.name = name3;
-   array[4].key = "shaa";
-   array[4].value.ltype = LITERAL_NAME;
-   array[4].value.u.name = name4;
-   return 5;
+   kv[3].key = "puda";
+   kv[3].value.ltype = LITERAL_NAME;
+   kv[3].value.u.name = name3;
+   kv[4].key = "shaa";
+   kv[4].value.ltype = LITERAL_NAME;
+   kv[4].value.u.name = name4;
+
+   for (i = 5; i < num; i++) {
+      kv[i].key = malloc(2);
+      kv[i].key[0] = '0' + (i % 10);
+      /* kv[i].key[0] = '0'; */
+      kv[i].key[1] = '\0';
+      kv[i].value.ltype = NUMBER;
+      kv[i].value.u.number = i;
+   }
+
+   for (i = 0; i < num; i++) {
+      printf("%2d\t%s\n", i, kv[i].key);
+   }
 }
 
 static void test_dict_mult() {
-   Node_t input[10];
+   const int max = 7;
+   Node_t input[max];
    int i;
-   int x;
-   int uniq_num;
-   uniq_num = kv_init(input, 10);
-   for (i = 0; i < 10; i++) {
-      x = i % uniq_num;
-      dict_put(input[x].key, &input[x].value);
+
+   kv_init(input, max);
+   for (i = 0; i < max; i++) {
+      dict_put(input[i].key, &input[i].value);
    }
 
+   dict_print_all();
+
    Node_t actual;
-   for (i = 0; i < uniq_num; i++) {
+   for (i = 0; i < max; i++) {
       actual.key = input[i].key;
       dict_get(actual.key, &actual.value);
       assert_dict_eq(&actual, &input[i]);
@@ -186,8 +200,8 @@ static void test_dict_mult() {
 
 #ifdef TEST_DICT
 int main() {
-   test_dict_put();
-   test_dict_get();
+   /* test_dict_put(); */
+   /* test_dict_get(); */
    test_dict_mult();
    return 1;
 }
