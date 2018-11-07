@@ -6,7 +6,7 @@ typedef struct Node {
    struct Node* next;
 } Node_t;
 
-#define TABLE_SIZE 32
+#define TABLE_SIZE 16
 
 static Node_t* array[TABLE_SIZE];
 
@@ -17,17 +17,6 @@ static int hash(char *str) {
   }
   return (int)(val % TABLE_SIZE);
 }
-
-/* static int dict_find(char* key, int* out_pos) { */
-/*    int i; */
-/*    for (i = 0; i < dict_pos; i++) { */
-/*       if (streq(key, dict_array[i].key)) { */
-/*          *out_pos = i; */
-/*          return 1; */
-/*       } */
-/*    } */
-/*    return 0; */
-/* } */
 
 /* static void dict_clear() { */
 /*    dict_pos = 0; */
@@ -42,7 +31,7 @@ static Node_t* dict_new(char* key, Token_t* value) {
 }
 
 static void dict_update(Node_t* head, char* key, Token_t* value) {
-   do {
+   for (;;) {
      // printf("upd %p %s %s\n", head, head->key, key);
       if (strcmp(head->key, key) == 0) { // match, set value to this node
          head->value = *value;
@@ -53,7 +42,7 @@ static void dict_update(Node_t* head, char* key, Token_t* value) {
       } else { // key missmatch go to next node
          head = head->next;
       }
-   } while (1);
+   }
    return;
 }
 
@@ -72,11 +61,16 @@ void dict_put(char* key, Token_t* value) {
 int dict_get(char* key, Token_t* out_value) {
    int idx = hash(key);
    Node_t* head = array[idx];
-   if (head != NULL) {
-      *out_value = head->value;
-      return 1;
+   for (;;) {
+      if (strcmp(head->key, key) == 0) {
+	 *out_value = head->value;
+	 return 1;
+      } else if (head == NULL) {
+	 return 0;
+      } else {
+	 head = head->next;
+      }
    }
-   return 0;
 }
 
 void dict_print_all() {
@@ -84,8 +78,10 @@ void dict_print_all() {
    int i = 0;
    for (i = 0; i < TABLE_SIZE; i++) {
       Node_t* head = array[i];
-      if (head != NULL) {
-         printf("%d\t%s\n", i, head->key);
+      printf("%d", i);
+      while (head != NULL) {
+         printf("\t%s", head->key);
+	 head = head->next;
       }
    }
    printf("-----\n");
