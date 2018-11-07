@@ -15,7 +15,7 @@ static int hash(char *str) {
   while (*str) {
     val += *str++;
   }
-  return (int)(val % 1024);
+  return (int)(val % TABLE_SIZE);
 }
 
 /* static int dict_find(char* key, int* out_pos) { */
@@ -43,15 +43,15 @@ static Node_t* dict_new(char* key, Token_t* value) {
 
 static void dict_update(Node_t* head, char* key, Token_t* value) {
    do {
-      printf("upd %p %s %s\n", head, head->key, key);
+     // printf("upd %p %s %s\n", head, head->key, key);
       if (strcmp(head->key, key) == 0) { // match, set value to this node
-	 head->value = *value;
-	 return;
+         head->value = *value;
+         return;
       } else if (head == NULL) { // end of list, add new node
-	 head = dict_new(key, value);
-	 return;
+         head = dict_new(key, value);
+         return;
       } else { // key missmatch go to next node
-	 head = head->next;
+         head = head->next;
       }
    } while (1);
    return;
@@ -63,7 +63,7 @@ void dict_put(char* key, Token_t* value) {
    if (head == NULL) {
       head = dict_new(key, value);
       array[idx] = head;
-      printf("put %p %s %s\n", head, head->key, key);
+      // printf("put %p to [%d] %s %s\n", head, idx, head->key, key);
    } else {
       dict_update(head, key, value);
    }
@@ -80,20 +80,15 @@ int dict_get(char* key, Token_t* out_value) {
 }
 
 void dict_print_all() {
-   printf("---\n");
+   printf("-all-\n");
    int i = 0;
    for (i = 0; i < TABLE_SIZE; i++) {
       Node_t* head = array[i];
       if (head != NULL) {
-      	 printf("%d\t%s\n", i, head->key);
+         printf("%d\t%s\n", i, head->key);
       }
-      /* printf("%d\t", i); */
-      /* while (head != NULL) { */
-      /* 	 printf("key: %s\t", head->key); */
-      /* 	 head = head->next; */
-      /* } */
-      /* printf("\n"); */
    }
+   printf("-----\n");
 }
 
 //
@@ -130,8 +125,6 @@ static void test_dict_put() {
 
    dict_put(input.key, &input.value);
 
-   dict_print_all();
-   
    int idx = hash(key);
    Node_t* actual = array[idx];
    assert_dict_eq(actual, &expect);
@@ -151,7 +144,7 @@ static void test_dict_get() {
 
 static int kv_init(Node_t* array, int num) {
    int i;
-			
+
    array[0].key = "foo";
    array[0].value.ltype = NUMBER;
    array[0].value.u.number = 123;
@@ -166,7 +159,7 @@ static int kv_init(Node_t* array, int num) {
    strcpy(name3, "compile");
    char* name4 = malloc(strlen("run") + 1);
    strcpy(name4, "run");
-   
+
    array[3].key = "puda";
    array[3].value.ltype = LITERAL_NAME;
    array[3].value.u.name = name3;
@@ -187,8 +180,6 @@ static void test_dict_mult() {
       dict_put(input[x].key, &input[x].value);
    }
 
-   dict_print_all();
-
    Node_t actual;
    for (i = 0; i < uniq_num; i++) {
       actual.key = input[i].key;
@@ -200,8 +191,8 @@ static void test_dict_mult() {
 #ifdef TEST_DICT
 int main() {
    test_dict_put();
-   /* test_dict_get(); */
-   /* test_dict_mult(); */
+   test_dict_get();
+   test_dict_mult();
    return 1;
 }
 #endif

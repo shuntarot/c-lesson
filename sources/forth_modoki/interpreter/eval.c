@@ -63,7 +63,6 @@ static void test_eval_num_one() {
 
     eval();
 
-    /* TODO: write code to pop stack top element */
     Token_t actual = {UNKNOWN, {0}};
     stack_pop(&actual);
     assert_token_number(expect, &actual);
@@ -80,7 +79,6 @@ static void test_eval_num_two() {
 
     eval();
 
-    /* TODO: write code to pop stack top and second top element */
     Token_t actual1 = {UNKNOWN, {0}};
     Token_t actual2 = {UNKNOWN, {0}};
     stack_pop(&actual1);
@@ -100,7 +98,6 @@ static void test_eval_num_add() {
 
     eval();
 
-    /* TODO: write code to pop stack top element */
     Token_t actual = {UNKNOWN, {0}};
     stack_pop(&actual);
     assert_token_number(expect, &actual);
