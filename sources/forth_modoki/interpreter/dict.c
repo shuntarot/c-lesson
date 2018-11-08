@@ -31,19 +31,20 @@ static Node_t* dict_new(char* key, Token_t* value) {
 }
 
 static void dict_update(Node_t* head, char* key, Token_t* value) {
+   Node_t* prev;
    for (;;) {
-      if (head != NULL) { printf("upd %p %s %s\n", head, head->key, key); }
-      if (head == NULL) { // end of list, add new node
+      if (head == NULL) { // end of list, insert
          head = dict_new(key, value);
+         prev->next = head;
          return;
       } else if (strcmp(head->key, key) == 0) { // match, set value to this node
          head->value = *value;
          return;
       } else { // key missmatch go to next node
+         prev = head;
          head = head->next;
       }
    }
-   return;
 }
 
 void dict_put(char* key, Token_t* value) {
@@ -52,7 +53,6 @@ void dict_put(char* key, Token_t* value) {
    if (head == NULL) {
       head = dict_new(key, value);
       array[idx] = head;
-      printf("put %p to [%d] %s %s\n", head, idx, head->key, key);
    } else {
       dict_update(head, key, value);
    }
@@ -74,18 +74,18 @@ int dict_get(char* key, Token_t* out_value) {
 }
 
 void dict_print_all() {
-   printf("-all-\n");
-   int i = 0;
+   printf("---print_all---\n");
+   int i;
    for (i = 0; i < TABLE_SIZE; i++) {
       Node_t* head = array[i];
-      printf("%d", i);
+      printf("%2d  %p:", i, head);
       while (head != NULL) {
-         printf("\t%s", head->key);
+         printf("%s -> %p ", head->key, head->next);
          head = head->next;
       }
       printf("\n");
    }
-   printf("-----\n");
+   printf("-------------\n");
 }
 
 //
@@ -139,16 +139,19 @@ static void test_dict_get() {
    assert_dict_eq(&actual, &expect);
 }
 
+static char* key_pool[] = {"foo", "bar", "toto", "ppu", "shaa",
+                           "122", "01", "a1b2", "cccc", "dddd"};
+
 static void kv_init(Node_t* kv, int num) {
    int i;
 
-   kv[0].key = "foo";
+   kv[0].key = key_pool[0];
    kv[0].value.ltype = NUMBER;
    kv[0].value.u.number = 123;
-   kv[1].key = "bar";
+   kv[1].key = key_pool[1];
    kv[1].value.ltype = NUMBER;
    kv[1].value.u.number = 65;
-   kv[2].key = "toto";
+   kv[2].key = key_pool[2];
    kv[2].value.ltype = NUMBER;
    kv[2].value.u.number = 1000;
 
@@ -157,29 +160,28 @@ static void kv_init(Node_t* kv, int num) {
    char* name4 = malloc(strlen("run") + 1);
    strcpy(name4, "run");
 
-   kv[3].key = "puda";
+   kv[3].key = key_pool[3];
    kv[3].value.ltype = LITERAL_NAME;
    kv[3].value.u.name = name3;
-   kv[4].key = "shaa";
+   kv[4].key = key_pool[4];
    kv[4].value.ltype = LITERAL_NAME;
    kv[4].value.u.name = name4;
 
    for (i = 5; i < num; i++) {
       kv[i].key = malloc(2);
       kv[i].key[0] = '0' + (i % 10);
-      /* kv[i].key[0] = '0'; */
       kv[i].key[1] = '\0';
       kv[i].value.ltype = NUMBER;
       kv[i].value.u.number = i;
    }
 
-   for (i = 0; i < num; i++) {
-      printf("%2d\t%s\n", i, kv[i].key);
-   }
+   /* for (i = 0; i < num; i++) { */
+   /*    printf("%2d\t%s\n", i, kv[i].key); */
+   /* } */
 }
 
 static void test_dict_mult() {
-   const int max = 7;
+   const int max = 10;
    Node_t input[max];
    int i;
 
@@ -188,7 +190,7 @@ static void test_dict_mult() {
       dict_put(input[i].key, &input[i].value);
    }
 
-   dict_print_all();
+   /* dict_print_all(); */
 
    Node_t actual;
    for (i = 0; i < max; i++) {
@@ -200,8 +202,8 @@ static void test_dict_mult() {
 
 #ifdef TEST_DICT
 int main() {
-   /* test_dict_put(); */
-   /* test_dict_get(); */
+   test_dict_put();
+   test_dict_get();
    test_dict_mult();
    return 1;
 }
