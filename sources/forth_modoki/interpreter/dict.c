@@ -32,17 +32,18 @@ static Node_t* dict_new(char* key, Token_t* value) {
 
 static void dict_update(Node_t* head, char* key, Token_t* value) {
    Node_t* prev;
+   Node_t* curr = head;
    for (;;) {
-      if (head == NULL) { // end of list, insert
-         head = dict_new(key, value);
-         prev->next = head;
+      if (curr == NULL) { // end of list, insert
+         curr = dict_new(key, value);
+         prev->next = curr;
          return;
-      } else if (strcmp(head->key, key) == 0) { // match, set value to this node
-         head->value = *value;
+      } else if (strcmp(curr->key, key) == 0) { // match, set value to this node
+         curr->value = *value;
          return;
       } else { // key missmatch go to next node
-         prev = head;
-         head = head->next;
+         prev = curr;
+         curr = curr->next;
       }
    }
 }
@@ -154,18 +155,12 @@ static void kv_init(Node_t* kv, int num) {
    kv[2].key = key_pool[2];
    kv[2].value.ltype = NUMBER;
    kv[2].value.u.number = 1000;
-
-   char* name3 = malloc(strlen("compile") + 1);
-   strcpy(name3, "compile");
-   char* name4 = malloc(strlen("run") + 1);
-   strcpy(name4, "run");
-
    kv[3].key = key_pool[3];
    kv[3].value.ltype = LITERAL_NAME;
-   kv[3].value.u.name = name3;
+   kv[3].value.u.name = "compile";
    kv[4].key = key_pool[4];
    kv[4].value.ltype = LITERAL_NAME;
-   kv[4].value.u.name = name4;
+   kv[4].value.u.name = "run";
 
    for (i = 5; i < num; i++) {
       kv[i].key = malloc(2);
@@ -200,10 +195,31 @@ static void test_dict_mult() {
    }
 }
 
+static void test_dict_same_hash() {
+   Node_t input0  = {.key = "abc", .value.ltype = NUMBER, .value.u.number = 0x0};
+   Node_t input1  = {.key = "cba", .value.ltype = NUMBER, .value.u.number = 0x11};
+   Node_t expect0 = input0;
+   Node_t expect1 = input1;
+
+   dict_put(input0.key, &input0.value);
+   dict_put(input1.key, &input1.value);
+
+   Node_t actual0;
+   Node_t actual1;
+   actual0.key = expect0.key;
+   actual1.key = expect1.key;
+   dict_get(actual0.key, &actual0.value);
+   dict_get(actual1.key, &actual1.value);
+
+   assert_dict_eq(&actual0, &expect0);
+   assert_dict_eq(&actual1, &expect1);
+}
+
 #ifdef TEST_DICT
 int main() {
    test_dict_put();
    test_dict_get();
+   test_dict_same_hash();
    test_dict_mult();
    return 1;
 }
