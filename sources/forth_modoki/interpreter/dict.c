@@ -7,6 +7,7 @@ typedef struct Node {
 } Node_t;
 
 #define TABLE_SIZE 16
+#define MAX_LIST   1024
 
 static Node_t* array[TABLE_SIZE];
 
@@ -18,9 +19,26 @@ static int hash(char *str) {
   return (int)(val % TABLE_SIZE);
 }
 
-/* static void dict_clear() { */
-/*    dict_pos = 0; */
-/* } */
+static void dict_clear() {
+   int tbl_id;
+   int lst_id;
+   int i;
+   Node_t* curr;
+   Node_t* clear_list[MAX_LIST];
+   for (tbl_id = 0; tbl_id < TABLE_SIZE; tbl_id++) {
+      curr = array[tbl_id];
+      lst_id = 0;
+      while (curr != NULL) {
+         clear_list[lst_id++] = curr;
+         curr = curr->next;
+      }
+      /* printf("tbl %d, list %d\n", tbl_id, lst_id); */
+      for (i = 0; i < lst_id; i++) {
+         free(clear_list[i]);
+      }
+      array[tbl_id] = NULL;
+   }
+}
 
 static Node_t* dict_new(char* key, Token_t* value) {
    Node_t* head = malloc(sizeof(Node_t));
@@ -126,6 +144,7 @@ static void test_dict_put() {
    int idx = hash(key);
    Node_t* actual = array[idx];
    assert_dict_eq(actual, &expect);
+   dict_clear();
 }
 
 static void test_dict_get() {
@@ -138,6 +157,7 @@ static void test_dict_get() {
    dict_get(key, &actual.value);
    actual.key = key;
    assert_dict_eq(&actual, &expect);
+   dict_clear();
 }
 
 static char* key_pool[] = {"foo", "bar", "toto", "ppu", "shaa",
@@ -193,6 +213,8 @@ static void test_dict_mult() {
       dict_get(actual.key, &actual.value);
       assert_dict_eq(&actual, &input[i]);
    }
+
+   dict_clear();
 }
 
 static void test_dict_same_hash() {
@@ -213,6 +235,8 @@ static void test_dict_same_hash() {
 
    assert_dict_eq(&actual0, &expect0);
    assert_dict_eq(&actual1, &expect1);
+
+   dict_clear();
 }
 
 #ifdef TEST_DICT
