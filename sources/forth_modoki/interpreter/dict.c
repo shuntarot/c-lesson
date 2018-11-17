@@ -7,7 +7,6 @@ typedef struct Node {
 } Node_t;
 
 #define TABLE_SIZE 16
-#define MAX_LIST   1024
 
 static Node_t* array[TABLE_SIZE];
 
@@ -20,23 +19,20 @@ static int hash(char *str) {
 }
 
 static void dict_clear() {
-   int tbl_id;
-   int lst_id;
    int i;
    Node_t* curr;
-   Node_t* clear_list[MAX_LIST];
-   for (tbl_id = 0; tbl_id < TABLE_SIZE; tbl_id++) {
-      curr = array[tbl_id];
-      lst_id = 0;
+   Node_t* prev;
+   for (i = 0; i < TABLE_SIZE; i++) {
+      curr = array[i];
+      int dbgid = 0;
       while (curr != NULL) {
-         clear_list[lst_id++] = curr;
+         prev = curr;
          curr = curr->next;
+         free(prev);
+         dbgid++;
       }
-      /* printf("tbl %d, list %d\n", tbl_id, lst_id); */
-      for (i = 0; i < lst_id; i++) {
-         free(clear_list[i]);
-      }
-      array[tbl_id] = NULL;
+      /* printf("tbl %d list %d\n", i, dbgid); */
+      array[i] = NULL;
    }
 }
 
@@ -160,6 +156,35 @@ static void test_dict_get() {
    dict_clear();
 }
 
+static void test_dict_get_empty() {
+   int   expect = 0;
+   int   actual;
+
+   Node_t temp;
+   actual = dict_get("foo", &temp.value);
+   assert(actual == expect);
+   dict_clear();
+}
+
+static void test_dict_clear() {
+   Node_t input = {.key="foo", {.ltype=LITERAL_NAME, .u.name="foo"}};
+   int   expect1 = 1;
+   int   expect2 = 0;
+   int   actual1;
+   int   actual2;
+   Node_t temp;
+
+   dict_put(input.key, &input.value);
+   actual1 = dict_get("foo", &temp.value);
+   assert(actual1 == expect1);
+
+   dict_clear();
+
+   actual1 = dict_get("foo", &temp.value);
+   assert(actual2 == expect2);
+}
+
+
 static char* key_pool[] = {"foo", "bar", "toto", "ppu", "shaa",
                            "122", "01", "a1b2", "cccc", "dddd"};
 
@@ -243,6 +268,8 @@ static void test_dict_same_hash() {
 int main() {
    test_dict_put();
    test_dict_get();
+   test_dict_get_empty();
+   test_dict_clear();
    test_dict_same_hash();
    test_dict_mult();
    return 1;
