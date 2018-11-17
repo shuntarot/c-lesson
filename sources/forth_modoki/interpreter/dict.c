@@ -168,8 +168,8 @@ static void test_dict_get_empty() {
 
 static void test_dict_clear() {
    Node_t input = {.key="foo", {.ltype=LITERAL_NAME, .u.name="foo"}};
-   int   expect1 = 1;
-   int   expect2 = 0;
+   int   expect1 = 1; // exists
+   int   expect2 = 0; // not exists
    int   actual1;
    int   actual2;
    Node_t temp;
@@ -264,12 +264,29 @@ static void test_dict_same_hash() {
    dict_clear();
 }
 
+static void test_dict_same_key() {
+   Node_t input0  = {.key = "abc", .value.ltype = NUMBER, .value.u.number = 0x0};
+   Node_t input1  = {.key = "abc", .value.ltype = NUMBER, .value.u.number = 0x11};
+   Node_t expect = input1;
+
+   dict_put(input0.key, &input0.value);
+   dict_put(input1.key, &input1.value);
+
+   Node_t actual;
+   actual.key = expect.key;
+   dict_get(actual.key, &actual.value);
+   assert_dict_eq(&actual, &expect);
+
+   dict_clear();
+}
+
 #ifdef TEST_DICT
 int main() {
    test_dict_put();
    test_dict_get();
    test_dict_get_empty();
    test_dict_clear();
+   test_dict_same_key();
    test_dict_same_hash();
    test_dict_mult();
    return 1;
