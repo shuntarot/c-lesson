@@ -1,13 +1,5 @@
 #include "clesson.h"
 
-typedef struct Node {
-   char*        key;
-   Token_t      value;
-   struct Node* next;
-} Node_t;
-
-#define TABLE_SIZE 16
-
 static Node_t* array[TABLE_SIZE];
 
 static int hash(char *str) {

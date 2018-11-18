@@ -4,6 +4,10 @@
 #include <string.h>
 #include <assert.h>
 
+#define STACK_SIZE 1024
+#define NAME_SIZE  256
+#define TABLE_SIZE 16
+
 enum LexicalType {
     NUMBER,
     SPACE,
@@ -15,17 +19,32 @@ enum LexicalType {
     UNKNOWN
 };
 
+enum ElementType {
+   ELEMENT_C_FUNC
+};
+
 typedef struct Token {
-    enum LexicalType ltype;
-    union {
-        int number;
-        char onechar;
-        char *name;
-    } u;
+   enum LexicalType ltype;
+   union {
+      int number;
+      char onechar;
+      char *name;
+   } u;
 } Token_t;
 
-#define STACK_SIZE 1024
-#define NAME_SIZE  256
+typedef struct Element {
+   enum ElementType etype;
+   union {
+      void (*cfunc)();
+   } u;
+} Element_t;
+
+typedef struct Node {
+   char*        key;
+   Token_t      value;
+   Element_t    elem;
+   struct Node* next;
+} Node_t;
 
 //
 // stack

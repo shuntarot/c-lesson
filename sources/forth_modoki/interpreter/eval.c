@@ -1,5 +1,17 @@
 #include "clesson.h"
 
+static void add_op() {
+   Token_t rs;
+   Token_t rt;
+   Token_t rd;
+
+   stack_pop(&rs);
+   stack_pop(&rt);
+   rd.ltype = NUMBER;
+   rd.u.number = rs.u.number + rt.u.number;
+   stack_push(&rd);
+}
+
 void eval() {
    int ch = EOF;
    Token_t token = {UNKNOWN, {0}};
@@ -18,11 +30,12 @@ void eval() {
             case EXECUTABLE_NAME:
                /* printf("EXECUTABLE_NAME: %s\n", token.u.name); */
                if (streq(token.u.name, "add")) {
-                  stack_pop(&token_t1);
-                  stack_pop(&token_t2);
-                  token.ltype = NUMBER;
-                  token.u.number = token_t1.u.number + token_t2.u.number;
-                  stack_push(&token);
+                  add_op();
+                  /* stack_pop(&token_t1); */
+                  /* stack_pop(&token_t2); */
+                  /* token.ltype = NUMBER; */
+                  /* token.u.number = token_t1.u.number + token_t2.u.number; */
+                  /* stack_push(&token); */
                } else if (streq(token.u.name, "def")) {
                   stack_pop(&token_t1);
                   stack_pop(&token_t2);
@@ -131,7 +144,7 @@ int main() {
     test_eval_literal();
 
     /* cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); */
-    cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar  add");
+    cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add");
 
     eval();
     Token_t token = {UNKNOWN, {0}};
