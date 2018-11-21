@@ -9,14 +9,14 @@
 #define TABLE_SIZE 16
 
 enum LexicalType {
-    NUMBER,
-    SPACE,
-    EXECUTABLE_NAME,
-    LITERAL_NAME,
-    OPEN_CURLY,
-    CLOSE_CURLY,
-    END_OF_FILE,
-    UNKNOWN
+   NUMBER,
+   SPACE,
+   EXECUTABLE_NAME,
+   LITERAL_NAME,
+   OPEN_CURLY,
+   CLOSE_CURLY,
+   END_OF_FILE,
+   UNKNOWN
 };
 
 enum ElementType {
@@ -29,20 +29,14 @@ typedef struct Token {
       int number;
       char onechar;
       char *name;
-   } u;
-} Token_t;
-
-typedef struct Element {
-   enum ElementType etype;
-   union {
       void (*cfunc)();
    } u;
-} Element_t;
+   enum ElementType etype;
+} Token_t;
 
 typedef struct Node {
    char*        key;
    Token_t      value;
-   Element_t    elem;
    struct Node* next;
 } Node_t;
 
@@ -80,8 +74,8 @@ int streq(const char *s1, const char *s2);
 
 
 /*
-return one character and move cursor.
-return EOF if end of file.
+  return one character and move cursor.
+  return EOF if end of file.
 */
 int cl_getc();
 

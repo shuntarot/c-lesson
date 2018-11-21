@@ -9,14 +9,15 @@ static void add_op() {
    stack_pop(&rt);
    rd.ltype = NUMBER;
    rd.u.number = rs.u.number + rt.u.number;
+   /* printf("add_op %d + %d = %d\n", rs.u.number, rt.u.number, rd.u.number); */
    stack_push(&rd);
 }
 
 void eval() {
    int ch = EOF;
    Token_t token = {UNKNOWN, {0}};
-   Token_t token_t1 = {UNKNOWN, {0}};
-   Token_t token_t2 = {UNKNOWN, {0}};
+   Token_t t1 = {UNKNOWN, {0}};
+   Token_t t2 = {UNKNOWN, {0}};
 
    do {
       ch = parse_one(ch, &token);
@@ -28,20 +29,18 @@ void eval() {
                stack_push(&token);
                break;
             case EXECUTABLE_NAME:
-               /* printf("EXECUTABLE_NAME: %s\n", token.u.name); */
-               if (streq(token.u.name, "add")) {
-                  add_op();
-                  /* stack_pop(&token_t1); */
-                  /* stack_pop(&token_t2); */
-                  /* token.ltype = NUMBER; */
-                  /* token.u.number = token_t1.u.number + token_t2.u.number; */
-                  /* stack_push(&token); */
-               } else if (streq(token.u.name, "def")) {
-                  stack_pop(&token_t1);
-                  stack_pop(&token_t2);
-                  dict_put(token_t2.u.name, &token_t1);
-               } else if (dict_get(token.u.name, &token)) {
-                  stack_push(&token);
+               printf("EXECUTABLE_NAME: %s\n", token.u.name);
+               if (streq(token.u.name, "def")) {
+                  stack_pop(&t1);
+                  stack_pop(&t2);
+                  dict_put(t2.u.name, &t1);
+	       } else if (dict_get(token.u.name, &t1)) {
+		  printf("dict_get %d %d\n", t1.ltype, t1.etype);
+		  if (t1.etype == ELEMENT_C_FUNC) {
+		     t1.u.cfunc();
+		  } else {
+		     stack_push(&t1);
+		  }
                } else {
                   stack_push(&token);
                }
@@ -59,6 +58,11 @@ void eval() {
    } while(ch != EOF);
 }
 
+static void register_primitives() {
+   Token_t add = {.etype=ELEMENT_C_FUNC, .u.cfunc=&add_op};
+   dict_put("add", &add);
+}
+
 //
 // Unit test
 //
@@ -69,68 +73,68 @@ static void assert_token_number(int expect, Token_t *actual) {
 }
 
 static void test_eval_num_one() {
-    char *input = "123";
-    int expect = 123;
+   char *input = "123";
+   int expect = 123;
 
-    cl_getc_set_src(input);
+   cl_getc_set_src(input);
 
-    eval();
+   eval();
 
-    Token_t actual = {UNKNOWN, {0}};
-    stack_pop(&actual);
-    assert_token_number(expect, &actual);
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+   assert_token_number(expect, &actual);
 
-    stack_clear();
+   stack_clear();
 }
 
 static void test_eval_num_two() {
-    char *input = "123 456";
-    int expect1 = 456;
-    int expect2 = 123;
+   char *input = "123 456";
+   int expect1 = 456;
+   int expect2 = 123;
 
-    cl_getc_set_src(input);
+   cl_getc_set_src(input);
 
-    eval();
+   eval();
 
-    Token_t actual1 = {UNKNOWN, {0}};
-    Token_t actual2 = {UNKNOWN, {0}};
-    stack_pop(&actual1);
-    stack_pop(&actual2);
-    assert_token_number(expect1, &actual1);
-    assert_token_number(expect2, &actual2);
+   Token_t actual1 = {UNKNOWN, {0}};
+   Token_t actual2 = {UNKNOWN, {0}};
+   stack_pop(&actual1);
+   stack_pop(&actual2);
+   assert_token_number(expect1, &actual1);
+   assert_token_number(expect2, &actual2);
 
-    stack_clear();
+   stack_clear();
 }
 
 
 static void test_eval_num_add() {
-    char *input = "1 2 add";
-    int expect = 3;
+   char *input = "1 2 add";
+   int expect = 3;
 
-    cl_getc_set_src(input);
+   cl_getc_set_src(input);
 
-    eval();
+   eval();
 
-    Token_t actual = {UNKNOWN, {0}};
-    stack_pop(&actual);
-    assert_token_number(expect, &actual);
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+   assert_token_number(expect, &actual);
 
-    stack_clear();
+   stack_clear();
 }
 
 static void test_eval_literal() {
-    char *input = "/hoge 432 def hoge";
-    int expect = 432;
+   char *input = "/hoge 432 def hoge";
+   int expect = 432;
 
-    cl_getc_set_src(input);
+   cl_getc_set_src(input);
 
-    eval();
+   eval();
 
-    Token_t actual = {UNKNOWN, {0}};
-    stack_pop(&actual);
-    assert_token_number(expect, &actual);
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+   assert_token_number(expect, &actual);
 
-    stack_clear();
+   stack_clear();
 }
 
 //
@@ -138,18 +142,19 @@ static void test_eval_literal() {
 //
 
 int main() {
-    test_eval_num_one();
-    test_eval_num_two();
-    test_eval_num_add();
-    test_eval_literal();
+   register_primitives();
+   test_eval_num_one();
+   test_eval_num_two();
+   test_eval_num_add();
+   /* test_eval_literal(); */
 
-    /* cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); */
-    cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add");
+   /* /\* cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); *\/ */
+   /* cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add"); */
 
-    eval();
-    Token_t token = {UNKNOWN, {0}};
-    stack_pop(&token);
-    printf("result: %d\n", token.u.number);
+   /* eval(); */
+   /* Token_t token = {UNKNOWN, {0}}; */
+   /* stack_pop(&token); */
+   /* printf("result: %d\n", token.u.number); */
 
-    return 1;
+   return 1;
 }
