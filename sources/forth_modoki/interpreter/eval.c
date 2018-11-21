@@ -9,8 +9,16 @@ static void add_op() {
    stack_pop(&rt);
    rd.ltype = NUMBER;
    rd.u.number = rs.u.number + rt.u.number;
-   /* printf("add_op %d + %d = %d\n", rs.u.number, rt.u.number, rd.u.number); */
    stack_push(&rd);
+}
+
+static void def_op() {
+   Token_t rs;
+   Token_t rt;
+
+   stack_pop(&rs);
+   stack_pop(&rt);
+   dict_put(rt.u.name, &rs);
 }
 
 void eval() {
@@ -30,11 +38,7 @@ void eval() {
                break;
             case EXECUTABLE_NAME:
                /* printf("EXECUTABLE_NAME: %s\n", token.u.name); */
-               if (streq(token.u.name, "def")) {
-                  stack_pop(&t1);
-                  stack_pop(&t2);
-                  dict_put(t2.u.name, &t1);
-	       } else if (dict_get(token.u.name, &t1)) {
+	       if (dict_get(token.u.name, &t1)) {
 		  /* printf("dict_get %d %d\n", t1.ltype, t1.etype); */
 		  if (t1.etype == ELEMENT_C_FUNC) {
 		     t1.u.cfunc();
@@ -61,6 +65,9 @@ void eval() {
 static void register_primitives() {
    Token_t add = {.etype=ELEMENT_C_FUNC, .u.cfunc=&add_op};
    dict_put("add", &add);
+   
+   Token_t def = {.etype=ELEMENT_C_FUNC, .u.cfunc=&def_op};
+   dict_put("def", &def);
 }
 
 //
