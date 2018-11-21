@@ -15,9 +15,9 @@ static void add_op() {
 
 void eval() {
    int ch = EOF;
-   Token_t token = {UNKNOWN, {0}};
-   Token_t t1 = {UNKNOWN, {0}};
-   Token_t t2 = {UNKNOWN, {0}};
+   Token_t token = {UNKNOWN, {0}, ELEMENT_UNDEF};
+   Token_t t1 = {UNKNOWN, {0}, ELEMENT_UNDEF};
+   Token_t t2 = {UNKNOWN, {0}, ELEMENT_UNDEF};
 
    do {
       ch = parse_one(ch, &token);
@@ -29,13 +29,13 @@ void eval() {
                stack_push(&token);
                break;
             case EXECUTABLE_NAME:
-               printf("EXECUTABLE_NAME: %s\n", token.u.name);
+               /* printf("EXECUTABLE_NAME: %s\n", token.u.name); */
                if (streq(token.u.name, "def")) {
                   stack_pop(&t1);
                   stack_pop(&t2);
                   dict_put(t2.u.name, &t1);
 	       } else if (dict_get(token.u.name, &t1)) {
-		  printf("dict_get %d %d\n", t1.ltype, t1.etype);
+		  /* printf("dict_get %d %d\n", t1.ltype, t1.etype); */
 		  if (t1.etype == ELEMENT_C_FUNC) {
 		     t1.u.cfunc();
 		  } else {
@@ -80,7 +80,7 @@ static void test_eval_num_one() {
 
    eval();
 
-   Token_t actual = {UNKNOWN, {0}};
+   Token_t actual = {UNKNOWN, {0}, ELEMENT_UNDEF};
    stack_pop(&actual);
    assert_token_number(expect, &actual);
 
@@ -96,8 +96,8 @@ static void test_eval_num_two() {
 
    eval();
 
-   Token_t actual1 = {UNKNOWN, {0}};
-   Token_t actual2 = {UNKNOWN, {0}};
+   Token_t actual1 = {UNKNOWN, {0}, ELEMENT_UNDEF};
+   Token_t actual2 = {UNKNOWN, {0}, ELEMENT_UNDEF};
    stack_pop(&actual1);
    stack_pop(&actual2);
    assert_token_number(expect1, &actual1);
@@ -115,7 +115,7 @@ static void test_eval_num_add() {
 
    eval();
 
-   Token_t actual = {UNKNOWN, {0}};
+   Token_t actual = {UNKNOWN, {0}, ELEMENT_UNDEF};
    stack_pop(&actual);
    assert_token_number(expect, &actual);
 
@@ -130,7 +130,7 @@ static void test_eval_literal() {
 
    eval();
 
-   Token_t actual = {UNKNOWN, {0}};
+   Token_t actual = {UNKNOWN, {0}, ELEMENT_UNDEF};
    stack_pop(&actual);
    assert_token_number(expect, &actual);
 
@@ -146,15 +146,15 @@ int main() {
    test_eval_num_one();
    test_eval_num_two();
    test_eval_num_add();
-   /* test_eval_literal(); */
+   test_eval_literal();
 
-   /* /\* cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); *\/ */
-   /* cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add"); */
+   /* cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); */
+   cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add");
 
-   /* eval(); */
-   /* Token_t token = {UNKNOWN, {0}}; */
-   /* stack_pop(&token); */
-   /* printf("result: %d\n", token.u.number); */
+   eval();
+   Token_t token = {UNKNOWN, {0}, ELEMENT_UNDEF};
+   stack_pop(&token);
+   printf("result: %d\n", token.u.number);
 
    return 1;
 }

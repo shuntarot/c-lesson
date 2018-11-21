@@ -20,7 +20,8 @@ enum LexicalType {
 };
 
 enum ElementType {
-   ELEMENT_C_FUNC
+   ELEMENT_C_FUNC,
+   ELEMENT_UNDEF
 };
 
 typedef struct Token {
