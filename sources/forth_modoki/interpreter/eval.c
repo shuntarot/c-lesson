@@ -1,16 +1,8 @@
 #include "clesson.h"
 
-static void add_op() {
-   Token_t rs;
-   Token_t rt;
-   Token_t rd;
-
-   stack_pop(&rs);
-   stack_pop(&rt);
-   rd.ltype = NUMBER;
-   rd.u.number = rs.u.number + rt.u.number;
-   stack_push(&rd);
-}
+//
+// c function
+//
 
 static void def_op() {
    Token_t rs;
@@ -20,6 +12,36 @@ static void def_op() {
    stack_pop(&rt);
    dict_put(rt.u.name, &rs);
 }
+
+#define two_op(op)                              \
+   Token_t rs;                                  \
+   Token_t rt;                                  \
+   Token_t rd;                                  \
+   stack_pop(&rt);                              \
+   stack_pop(&rs);                              \
+   rd.ltype = NUMBER;                           \
+   rd.u.number = rs.u.number op rt.u.number;    \
+   stack_push(&rd);
+
+static void add_op() {
+   two_op( + )
+      }
+
+static void sub_op() {
+   two_op( - )
+      }
+
+static void mul_op() {
+   two_op( * )
+      }
+
+static void div_op() {
+   two_op( / )
+      }
+
+//
+// eval
+//
 
 void eval() {
    int ch = EOF;
@@ -38,13 +60,13 @@ void eval() {
                break;
             case EXECUTABLE_NAME:
                /* printf("EXECUTABLE_NAME: %s\n", token.u.name); */
-	       if (dict_get(token.u.name, &t1)) {
-		  /* printf("dict_get %d %d\n", t1.ltype, t1.etype); */
-		  if (t1.etype == ELEMENT_C_FUNC) {
-		     t1.u.cfunc();
-		  } else {
-		     stack_push(&t1);
-		  }
+               if (dict_get(token.u.name, &t1)) {
+                  /* printf("dict_get %d %d\n", t1.ltype, t1.etype); */
+                  if (t1.etype == ELEMENT_C_FUNC) {
+                     t1.u.cfunc();
+                  } else {
+                     stack_push(&t1);
+                  }
                } else {
                   stack_push(&token);
                }
@@ -63,11 +85,20 @@ void eval() {
 }
 
 static void register_primitives() {
-   Token_t add = {.etype=ELEMENT_C_FUNC, .u.cfunc=&add_op};
-   dict_put("add", &add);
-   
    Token_t def = {.etype=ELEMENT_C_FUNC, .u.cfunc=&def_op};
    dict_put("def", &def);
+
+   Token_t add = {.etype=ELEMENT_C_FUNC, .u.cfunc=&add_op};
+   dict_put("add", &add);
+
+   Token_t sub = {.etype=ELEMENT_C_FUNC, .u.cfunc=&sub_op};
+   dict_put("sub", &sub);
+
+   Token_t mul = {.etype=ELEMENT_C_FUNC, .u.cfunc=&mul_op};
+   dict_put("mul", &mul);
+
+   Token_t div = {.etype=ELEMENT_C_FUNC, .u.cfunc=&div_op};
+   dict_put("div", &div);
 }
 
 //
@@ -144,6 +175,51 @@ static void test_eval_literal() {
    stack_clear();
 }
 
+static void test_eval_num_sub() {
+   char *input = "1 2 sub";
+   int expect = -1;
+
+   cl_getc_set_src(input);
+
+   eval();
+
+   Token_t actual = {UNKNOWN, {0}, ELEMENT_UNDEF};
+   stack_pop(&actual);
+   assert_token_number(expect, &actual);
+
+   stack_clear();
+}
+
+static void test_eval_num_mul() {
+   char *input = "3 8 mul";
+   int expect = 24;
+
+   cl_getc_set_src(input);
+
+   eval();
+
+   Token_t actual = {UNKNOWN, {0}, ELEMENT_UNDEF};
+   stack_pop(&actual);
+   assert_token_number(expect, &actual);
+
+   stack_clear();
+}
+
+static void test_eval_num_div() {
+   char *input = "8 3 div";
+   int expect = 2;
+
+   cl_getc_set_src(input);
+
+   eval();
+
+   Token_t actual = {UNKNOWN, {0}, ELEMENT_UNDEF};
+   stack_pop(&actual);
+   assert_token_number(expect, &actual);
+
+   stack_clear();
+}
+
 //
 // main
 //
@@ -154,9 +230,12 @@ int main() {
    test_eval_num_two();
    test_eval_num_add();
    test_eval_literal();
+   test_eval_num_sub();
+   test_eval_num_mul();
+   test_eval_num_div();
 
    /* cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); */
-   cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add");
+   cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
 
    eval();
    Token_t token = {UNKNOWN, {0}, ELEMENT_UNDEF};
