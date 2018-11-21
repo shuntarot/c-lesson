@@ -21,23 +21,23 @@ static void def_op() {
    stack_pop(&rt);                              \
    rd.ltype = NUMBER;                           \
    rd.u.number = rt.u.number op rs.u.number;    \
-   stack_push(&rd);
+   stack_push(&rd)
 
 static void add_op() {
-   two_op( + )
-      }
+   two_op( + );
+}
 
 static void sub_op() {
-   two_op( - )
-      }
+   two_op( - );
+}
 
 static void mul_op() {
-   two_op( * )
-      }
+   two_op( * );
+}
 
 static void div_op() {
-   two_op( / )
-      }
+   two_op( / );
+}
 
 //
 // eval
