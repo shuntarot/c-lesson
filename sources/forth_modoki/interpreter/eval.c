@@ -17,10 +17,10 @@ static void def_op() {
    Token_t rs;                                  \
    Token_t rt;                                  \
    Token_t rd;                                  \
-   stack_pop(&rt);                              \
    stack_pop(&rs);                              \
+   stack_pop(&rt);                              \
    rd.ltype = NUMBER;                           \
-   rd.u.number = rs.u.number op rt.u.number;    \
+   rd.u.number = rt.u.number op rs.u.number;    \
    stack_push(&rd);
 
 static void add_op() {
@@ -176,8 +176,8 @@ static void test_eval_literal() {
 }
 
 static void test_eval_num_sub() {
-   char *input = "1 2 sub";
-   int expect = -1;
+   char *input = "5 3 sub";
+   int expect = 2;
 
    cl_getc_set_src(input);
 
