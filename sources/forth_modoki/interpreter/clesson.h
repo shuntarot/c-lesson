@@ -16,12 +16,8 @@ enum LexicalType {
    OPEN_CURLY,
    CLOSE_CURLY,
    END_OF_FILE,
-   UNKNOWN
-};
-
-enum ElementType {
    ELEMENT_C_FUNC,
-   ELEMENT_UNDEF
+   UNKNOWN
 };
 
 typedef struct Token {
@@ -32,7 +28,6 @@ typedef struct Token {
       char *name;
       void (*cfunc)();
    } u;
-   enum ElementType etype;
 } Token_t;
 
 typedef struct Node {
