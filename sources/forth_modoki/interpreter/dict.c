@@ -98,6 +98,7 @@ void dict_print_all() {
 //
 // test
 //
+#ifdef TEST_DICT
 
 static int token_eq(const Token_t* a, const Token_t* b) {
    // only support NUMBER and LITERAL_NAME
@@ -272,7 +273,6 @@ static void test_dict_same_key() {
    dict_clear();
 }
 
-#ifdef TEST_DICT
 int main() {
    test_dict_put();
    test_dict_get();

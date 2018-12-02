@@ -142,10 +142,14 @@ void parser_print_all() {
 }
 
 
+//
+// test
+//
+#ifdef TEST_PARSER
 
 static void local_stack_clear() {
    char dummy[1024] = {' '};
-   printf("clear stack %x\n", dummy[1023]);
+   /* printf("clear stack %x\n", dummy[1023]); */
 }
 
 int streq(const char *s1, const char *s2) {
@@ -233,11 +237,10 @@ static void unit_tests() {
    test_cl_strcmp();
 }
 
-#if 0
 int main() {
    unit_tests();
    cl_getc_set_src("123 45 add /some { 2 3 add } def");
-   parser_print_all();
+   /* parser_print_all(); */
    return 1;
 }
 #endif
