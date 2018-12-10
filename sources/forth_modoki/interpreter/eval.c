@@ -46,6 +46,7 @@ static void div_op() {
 void eval() {
    int ch = EOF;
    Token_t token = {UNKNOWN, {0}};
+   struct TokenArray *exec_arr;
 
    do {
       ch = parse_one(ch, &token);
@@ -92,6 +93,25 @@ static void register_primitives() {
 
    Token_t div = {.ltype=ELEMENT_C_FUNC, .u.cfunc=div_op};
    dict_put("div", &div);
+}
+
+#define MAX_NAME_OP_NUMBERS 256
+static int compile_exec_array(struct TokenArray *out_token_array) {
+   int ch = EOF;
+   int num_token = 0;
+   Token_t token = {UNKNOWN, {0}};
+   Token_t arr[MAX_NAME_OP_NUMBERS];
+
+   for (int i = 0; i < MAX_NAME_OP_NUMBERS; i++) {
+      ch = parse_one(ch, &token);
+      if (token.ltype != CLOSE_CURLY) {
+         num_token = i + 1;
+         break;
+      }
+      arr[i] = token;
+   }
+   out_token_array = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * num_token);
+   return ch;
 }
 
 //
