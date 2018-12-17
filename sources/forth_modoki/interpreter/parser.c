@@ -60,11 +60,11 @@ int parse_one(int prev_ch, Token_t *out_token) {
       }
       name[i] = '\0';
       if (dict_get(name, out_token)) {
-	; // set ELEMENT_C_FUNC
+	      ; // set ELEMENT_C_FUNC
       } else {
-	out_token->ltype = EXECUTABLE_NAME;
-	out_token->u.name = malloc(i);
-	cl_strncpy(out_token->u.name, name, i);
+	      out_token->ltype = EXECUTABLE_NAME;
+	      out_token->u.name = malloc(i);
+	      cl_strncpy(out_token->u.name, name, i);
       }
       return ch;
    }

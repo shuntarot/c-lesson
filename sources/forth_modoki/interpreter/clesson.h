@@ -17,6 +17,7 @@ enum LexicalType {
    CLOSE_CURLY,
    END_OF_FILE,
    ELEMENT_C_FUNC,
+   EXEC_ARRAY,
    UNKNOWN
 };
 

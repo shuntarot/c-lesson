@@ -69,7 +69,12 @@ void eval() {
                /* printf("LITERAL_NAME: %s\n", token.u.name); */
                stack_push(&token);
                break;
-
+            case OPEN_CURLY:
+               ch = compile_exec_array(exec_arr);
+               token.ltype = EXEC_ARRAY;
+               token.u.bytecodes = exec_arr;
+               stack_push(&token);
+               break;
             default:
                /* printf("Unknown type %d\n", token.ltype); */
                break;
@@ -96,7 +101,7 @@ static void register_primitives() {
 }
 
 #define MAX_NAME_OP_NUMBERS 256
-static int compile_exec_array(struct TokenArray *out_token_array) {
+int compile_exec_array(struct TokenArray *out_token_array) {
    int ch = EOF;
    int num_token = 0;
    Token_t token = {UNKNOWN, {0}};
@@ -104,13 +109,17 @@ static int compile_exec_array(struct TokenArray *out_token_array) {
 
    for (int i = 0; i < MAX_NAME_OP_NUMBERS; i++) {
       ch = parse_one(ch, &token);
-      if (token.ltype != CLOSE_CURLY) {
-         num_token = i + 1;
+      if (token.ltype == CLOSE_CURLY) {
+         num_token = i;
          break;
       }
       arr[i] = token;
    }
    out_token_array = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * num_token);
+   out_token_array->len = num_token;
+   for (int i = 0; i < num_token; i++) {
+      out_token_array->token[i] = arr[i];
+   }
    return ch;
 }
 
@@ -233,19 +242,36 @@ static void test_eval_num_div() {
    stack_clear();
 }
 
+static void test_eval_exec_array() {
+   char *input = "{ 1 }";
+   struct TokenArray bc = {1, {{NUMBER, {1}}}};
+   Token_t expect = {.ltype=EXEC_ARRAY, .u.bytecodes=&bc};
+
+   cl_getc_set_src(input);
+
+   eval();
+
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+
+   stack_clear();
+}
+
 //
 // main
 //
 
 int main() {
    register_primitives();
-   test_eval_num_one();
-   test_eval_num_two();
-   test_eval_num_add();
-   test_eval_literal();
-   test_eval_num_sub();
-   test_eval_num_mul();
-   test_eval_num_div();
+   // test_eval_num_one();
+   // test_eval_num_two();
+   // test_eval_num_add();
+   // test_eval_literal();
+   // test_eval_num_sub();
+   // test_eval_num_mul();
+   // test_eval_num_div();
+   test_eval_exec_array();
+   return 1;
 
    /* cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); */
    cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");

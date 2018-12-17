@@ -1,18 +1,18 @@
 TARGET := interp
-SRCS   := cl_getc.c dict.c eval.c parser.c stack.c clesson.h
+SRCS   := cl_getc.c dict.c eval.c parser.c stack.c
 
 CC     := gcc
 
 all: $(TARGET)
 
-$(TARGET): $(SRCS)
-	$(CC) -g -Wall $^ -o $@
+$(TARGET): $(SRCS) clesson.h
+	$(CC) -g -Wall -I. -o $@ $(filter %.c, $^)
 
 dict: cl_getc.c dict.c parser.c clesson.h
-	$(CC) -g -Wall -DTEST_DICT $^ -o $@
+	$(CC) -g -Wall -I. -DTEST_DICT -o $@ $(filter %.c, $^)
 
 parser: cl_getc.c dict.c parser.c clesson.h
-	$(CC) -g -Wall -DTEST_PARSER $^ -o $@
+	$(CC) -g -Wall -I. -DTEST_PARSER -o $@ $(filter %.c, $^)
 
 memcheck:
 	valgrind --leak-check=full ./$(TARGET)
