@@ -262,7 +262,7 @@ static void test_eval_num_div() {
    stack_clear();
 }
 
-static void test_eval_exec_array() {
+static void test_eval_exec_array1() {
    char *input = "{1}";
    struct TokenArray* bc = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * 1);
    bc->len = 1;
@@ -281,28 +281,69 @@ static void test_eval_exec_array() {
    stack_clear();
 }
 
+static void test_eval_exec_array2() {
+   char *input = "{/abc}";
+   struct TokenArray* bc = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * 1);
+   bc->len = 1;
+   Token_t t0 = {.ltype=LITERAL_NAME, .u.name="abc"};
+   bc->token[0] = t0;
+   Token_t expect = {.ltype=EXEC_ARRAY, .u.bytecodes=bc};
+
+   cl_getc_set_src(input);
+
+   eval();
+
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+   assert_token(expect, actual);
+
+   stack_clear();
+}
+
+static void test_eval_exec_array3() {
+   char *input = "{abc}";
+   struct TokenArray* bc = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * 1);
+   bc->len = 1;
+   Token_t t0 = {.ltype=EXECUTABLE_NAME, .u.name="abc"};
+   bc->token[0] = t0;
+   Token_t expect = {.ltype=EXEC_ARRAY, .u.bytecodes=bc};
+
+   cl_getc_set_src(input);
+
+   eval();
+
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+   assert_token(expect, actual);
+
+   stack_clear();
+}
+
+
 //
 // main
 //
 
 int main() {
    register_primitives();
-   test_eval_num_one();
-   test_eval_num_two();
-   test_eval_num_add();
-   test_eval_literal();
-   test_eval_num_sub();
-   test_eval_num_mul();
-   test_eval_num_div();
-   test_eval_exec_array();
+   // test_eval_num_one();
+   // test_eval_num_two();
+   // test_eval_num_add();
+   // test_eval_literal();
+   // test_eval_num_sub();
+   // test_eval_num_mul();
+   // test_eval_num_div();
+   test_eval_exec_array1();
+   test_eval_exec_array2();
+   test_eval_exec_array3();
 
    /* cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); */
-   cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
+   // cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
 
-   eval();
-   Token_t token = {UNKNOWN, {0}};
-   stack_pop(&token);
-   printf("result: %d\n", token.u.number);
+   // eval();
+   // Token_t token = {UNKNOWN, {0}};
+   // stack_pop(&token);
+   // printf("result: %d\n", token.u.number);
 
    return 1;
 }
