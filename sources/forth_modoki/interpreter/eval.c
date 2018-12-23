@@ -62,22 +62,28 @@ static struct TokenArray* compile_exec_array(int prev_ch) {
    int num_token = 0;
    Token_t token = {UNKNOWN, {0}};
    Token_t arr[MAX_NAME_OP_NUMBERS];
-   struct TokenArray* ta;
+   struct TokenArray* exec_array;
+   struct TokenArray* ret;
 
    for (int i = 0; i < MAX_NAME_OP_NUMBERS; i++) {
       ch = parse_one(ch, &token);
       if (token.ltype == CLOSE_CURLY) {
          num_token = i;
          break;
+      } else if (token.ltype == OPEN_CURLY) {
+         exec_array = compile_exec_array(ch);
+         token.ltype = EXEC_ARRAY;
+         token.u.bytecodes = exec_array;
+         ch = '}';
       }
       arr[i] = token;
    }
-   ta = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * num_token);
-   ta->len = num_token;
+   ret = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * num_token);
+   ret->len = num_token;
    for (int i = 0; i < num_token; i++) {
-      ta->token[i] = arr[i];
+      ret->token[i] = arr[i];
    }
-   return ta;
+   return ret;
 }
 
 //
@@ -115,7 +121,7 @@ void eval() {
                token.ltype = EXEC_ARRAY;
                token.u.bytecodes = exec_arr;
                stack_push(&token);
-               ch = CLOSE_CURLY;
+               ch = '}';
                break;
             default:
                /* printf("Unknown type %d\n", token.ltype); */
@@ -252,7 +258,6 @@ static void test_eval_num_div() {
    int expect = 2;
 
    cl_getc_set_src(input);
-
    eval();
 
    Token_t actual = {UNKNOWN, {0}};
@@ -271,7 +276,6 @@ static void test_eval_exec_array1() {
    Token_t expect = {.ltype=EXEC_ARRAY, .u.bytecodes=bc};
 
    cl_getc_set_src(input);
-
    eval();
 
    Token_t actual = {UNKNOWN, {0}};
@@ -290,7 +294,6 @@ static void test_eval_exec_array2() {
    Token_t expect = {.ltype=EXEC_ARRAY, .u.bytecodes=bc};
 
    cl_getc_set_src(input);
-
    eval();
 
    Token_t actual = {UNKNOWN, {0}};
@@ -309,7 +312,40 @@ static void test_eval_exec_array3() {
    Token_t expect = {.ltype=EXEC_ARRAY, .u.bytecodes=bc};
 
    cl_getc_set_src(input);
+   eval();
 
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+   assert_token(expect, actual);
+
+   stack_clear();
+}
+
+static void test_eval_exec_array_nest() {
+   char *input = "{1 {2} 3}";
+
+   Token_t tnest = {NUMBER, {2}}; 
+   struct TokenArray* bc_nest = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * 1);
+   bc_nest->len = 1;
+   bc_nest->token[0] = tnest; 
+
+   Token_t t0 = {NUMBER, {1}};
+   Token_t t1 = {SPACE, {0}};
+   Token_t t2 = {EXEC_ARRAY, {bc_nest}};
+   Token_t t3 = {SPACE, {0}};
+   Token_t t4 = {NUMBER, {3}};
+   
+   struct TokenArray* bc = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * 5);
+   bc->len = 5;
+   bc->token[0] = t0;
+   bc->token[1] = t1;
+   bc->token[2] = t2;
+   bc->token[3] = t3;
+   bc->token[4] = t4;
+
+   Token_t expect = {EXEC_ARRAY, {bc}};
+
+   cl_getc_set_src(input);
    eval();
 
    Token_t actual = {UNKNOWN, {0}};
@@ -333,9 +369,10 @@ int main() {
    // test_eval_num_sub();
    // test_eval_num_mul();
    // test_eval_num_div();
-   test_eval_exec_array1();
-   test_eval_exec_array2();
-   test_eval_exec_array3();
+   // test_eval_exec_array1();
+   // test_eval_exec_array2();
+   // test_eval_exec_array3();
+   test_eval_exec_array_nest();
 
    /* cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); */
    // cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
