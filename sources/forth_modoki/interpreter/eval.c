@@ -321,6 +321,35 @@ static void test_eval_exec_array3() {
    stack_clear();
 }
 
+static void test_eval_exec_array_mult() {
+   char *input = "{1} {2}";
+
+   Token_t t0 = {NUMBER, {1}};
+   struct TokenArray* bc0 = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * 1);
+   bc0->len = 1;
+   bc0->token[0] = t0;
+
+   Token_t t1 = {NUMBER, {2}};
+   struct TokenArray* bc1 = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * 1);
+   bc1->len = 1;
+   bc1->token[0] = t1;
+
+   Token_t expect1 = {EXEC_ARRAY, .u.bytecodes=bc0};
+   Token_t expect2 = {EXEC_ARRAY, .u.bytecodes=bc1};
+
+   cl_getc_set_src(input);
+   eval();
+
+   Token_t actual1 = {UNKNOWN, {0}};
+   Token_t actual2 = {UNKNOWN, {0}};
+   stack_pop(&actual2);
+   stack_pop(&actual1);
+   assert_token(expect1, actual1);
+   assert_token(expect2, actual2);
+
+   stack_clear();
+}
+
 static void test_eval_exec_array_nest() {
    char *input = "{1 {2} 3}";
 
@@ -331,7 +360,7 @@ static void test_eval_exec_array_nest() {
 
    Token_t t0 = {NUMBER, {1}};
    Token_t t1 = {SPACE, {0}};
-   Token_t t2 = {EXEC_ARRAY, {bc_nest}};
+   Token_t t2 = {EXEC_ARRAY, .u.bytecodes=bc_nest};
    Token_t t3 = {SPACE, {0}};
    Token_t t4 = {NUMBER, {3}};
    
@@ -343,7 +372,8 @@ static void test_eval_exec_array_nest() {
    bc->token[3] = t3;
    bc->token[4] = t4;
 
-   Token_t expect = {EXEC_ARRAY, {bc}};
+   Token_t expect = {EXEC_ARRAY, .u.bytecodes=bc};
+
 
    cl_getc_set_src(input);
    eval();
@@ -362,25 +392,26 @@ static void test_eval_exec_array_nest() {
 
 int main() {
    register_primitives();
-   // test_eval_num_one();
-   // test_eval_num_two();
-   // test_eval_num_add();
-   // test_eval_literal();
-   // test_eval_num_sub();
-   // test_eval_num_mul();
-   // test_eval_num_div();
-   // test_eval_exec_array1();
-   // test_eval_exec_array2();
-   // test_eval_exec_array3();
+   test_eval_num_one();
+   test_eval_num_two();
+   test_eval_num_add();
+   test_eval_literal();
+   test_eval_num_sub();
+   test_eval_num_mul();
+   test_eval_num_div();
+   test_eval_exec_array1();
+   test_eval_exec_array2();
+   test_eval_exec_array3();
+   test_eval_exec_array_mult();
    test_eval_exec_array_nest();
 
    /* cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); */
-   // cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
+   cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
 
-   // eval();
-   // Token_t token = {UNKNOWN, {0}};
-   // stack_pop(&token);
-   // printf("result: %d\n", token.u.number);
+   eval();
+   Token_t token = {UNKNOWN, {0}};
+   stack_pop(&token);
+   printf("result: %d\n", token.u.number);
 
    return 1;
 }
