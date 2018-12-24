@@ -74,7 +74,7 @@ static struct TokenArray* compile_exec_array(int prev_ch) {
          exec_array = compile_exec_array(ch);
          token.ltype = EXEC_ARRAY;
          token.u.bytecodes = exec_array;
-         ch = '}';
+         ch = ' ';
       }
       arr[i] = token;
    }
@@ -89,6 +89,35 @@ static struct TokenArray* compile_exec_array(int prev_ch) {
 //
 // eval
 //
+
+void eval_exec_array(struct TokenArray* exec_array) {
+   Token_t token;
+   for (int i = 0; i < exec_array->len; i++) {
+      token = exec_array->token[i];
+      switch (token.ltype) {
+         case NUMBER:
+            stack_push(&token);
+            break;
+         case ELEMENT_C_FUNC:
+            token.u.cfunc();
+            break;
+         case EXEC_ARRAY:
+            eval_exec_array(token.u.bytecodes);
+            break;
+         case EXECUTABLE_NAME:
+            stack_push(&token);
+            break;
+         case LITERAL_NAME:
+            stack_push(&token);
+            break;
+         case SPACE:
+            break;
+         default:
+            printf("Unsuppoted type %d\n", token.ltype);
+            break;
+      }
+   }
+}
 
 void eval() {
    int ch = EOF;
@@ -108,6 +137,10 @@ void eval() {
                /* printf("ELEMENT_C_FUNC\n"); */
                token.u.cfunc();
                break;
+            case EXEC_ARRAY:
+               // printf("EXEC_ARRAY\n");
+               eval_exec_array(token.u.bytecodes);
+               break;
             case EXECUTABLE_NAME:
                /* printf("EXECUTABLE_NAME: %s\n", token.u.name); */
                stack_push(&token);
@@ -121,7 +154,7 @@ void eval() {
                token.ltype = EXEC_ARRAY;
                token.u.bytecodes = exec_arr;
                stack_push(&token);
-               ch = '}';
+               ch = ' ';
                break;
             default:
                /* printf("Unknown type %d\n", token.ltype); */
@@ -374,13 +407,63 @@ static void test_eval_exec_array_nest() {
 
    Token_t expect = {EXEC_ARRAY, .u.bytecodes=bc};
 
-
    cl_getc_set_src(input);
    eval();
 
    Token_t actual = {UNKNOWN, {0}};
    stack_pop(&actual);
    assert_token(expect, actual);
+
+   stack_clear();
+}
+
+static void test_eval_exec_array_eval() {
+   char *input = "/foo {1 2 add} def foo";   
+   int expect = 3;
+
+   cl_getc_set_src(input);
+
+   eval();
+
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+   assert_token_number(expect, &actual);
+
+   stack_clear();
+}
+
+static void test_eval_exec_array_eval_nest() {
+   char *input = "/ZZ {6} def /YY {4 ZZ 5} def /XX {1 2 YY 3} def XX";
+   
+   Token_t expect0 = {NUMBER, {1}};
+   Token_t expect1 = {NUMBER, {2}};
+   Token_t expect2 = {NUMBER, {4}};
+   Token_t expect3 = {NUMBER, {6}};
+   Token_t expect4 = {NUMBER, {5}};
+   Token_t expect5 = {NUMBER, {3}};
+
+   cl_getc_set_src(input);
+   eval();
+
+   Token_t actual0 = {UNKNOWN, {0}};
+   Token_t actual1 = {UNKNOWN, {0}};
+   Token_t actual2 = {UNKNOWN, {0}};
+   Token_t actual3 = {UNKNOWN, {0}};
+   Token_t actual4 = {UNKNOWN, {0}};
+   Token_t actual5 = {UNKNOWN, {0}};
+   
+   stack_pop(&actual0);
+   stack_pop(&actual1);
+   stack_pop(&actual2);
+   stack_pop(&actual3);
+   stack_pop(&actual4);
+   stack_pop(&actual5);
+   assert_token(expect0, actual0);
+   assert_token(expect1, actual1);
+   assert_token(expect2, actual2);
+   assert_token(expect3, actual3);
+   assert_token(expect4, actual4);
+   assert_token(expect5, actual5);
 
    stack_clear();
 }
@@ -404,8 +487,10 @@ int main() {
    test_eval_exec_array3();
    test_eval_exec_array_mult();
    test_eval_exec_array_nest();
+   test_eval_exec_array_eval();
+   // test_eval_exec_array_eval_nest();
 
-   /* cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); */
+   // /* cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); */
    cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
 
    eval();
