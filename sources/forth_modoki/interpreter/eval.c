@@ -452,12 +452,12 @@ static void test_eval_exec_array_eval_nest() {
    Token_t actual4 = {UNKNOWN, {0}};
    Token_t actual5 = {UNKNOWN, {0}};
    
-   stack_pop(&actual0);
-   stack_pop(&actual1);
-   stack_pop(&actual2);
-   stack_pop(&actual3);
-   stack_pop(&actual4);
    stack_pop(&actual5);
+   stack_pop(&actual4);
+   stack_pop(&actual3);
+   stack_pop(&actual2);
+   stack_pop(&actual1);
+   stack_pop(&actual0);
    assert_token(expect0, actual0);
    assert_token(expect1, actual1);
    assert_token(expect2, actual2);
@@ -488,9 +488,8 @@ int main() {
    test_eval_exec_array_mult();
    test_eval_exec_array_nest();
    test_eval_exec_array_eval();
-   // test_eval_exec_array_eval_nest();
+   test_eval_exec_array_eval_nest();
 
-   // /* cl_getc_set_src("1 2 3 add add 4 5 6 7 8 9 add add add add add add"); */
    cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
 
    eval();
