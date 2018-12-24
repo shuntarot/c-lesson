@@ -80,9 +80,7 @@ static struct TokenArray* compile_exec_array(int prev_ch) {
    }
    ret = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * num_token);
    ret->len = num_token;
-   for (int i = 0; i < num_token; i++) {
-      ret->token[i] = arr[i];
-   }
+   memcpy(ret->token, arr, sizeof(Token_t) * num_token);
    return ret;
 }
 
