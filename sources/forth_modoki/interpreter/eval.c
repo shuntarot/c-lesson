@@ -39,6 +39,20 @@ static void div_op() {
    two_op( / );
 }
 
+static void sel_op() {
+   Token_t rs;
+   Token_t rt;
+   Token_t sel;
+   stack_pop(&rs);
+   stack_pop(&rt);
+   stack_pop(&sel);
+   if (sel.u.number) {
+      stack_push(&rt);
+   } else {
+      stack_push(&rs);
+   }
+}
+
 static void register_primitives() {
    Token_t def = {.ltype=ELEMENT_C_FUNC, .u.cfunc=def_op};
    dict_put("def", &def);
@@ -54,6 +68,9 @@ static void register_primitives() {
 
    Token_t div = {.ltype=ELEMENT_C_FUNC, .u.cfunc=div_op};
    dict_put("div", &div);
+
+   Token_t sel = {.ltype=ELEMENT_C_FUNC, .u.cfunc=sel_op};
+   dict_put("ifelse", &sel);
 }
 
 #define MAX_NAME_OP_NUMBERS 256
@@ -465,6 +482,20 @@ static void test_eval_exec_array_eval_nest() {
    stack_clear();
 }
 
+static void test_eval_ifelse_num() {
+   char *input = "1 2 3 ifelse";
+   int expect = 2;
+
+   cl_getc_set_src(input);
+
+   eval();
+
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+   assert_token_number(expect, &actual);
+
+   stack_clear();
+}
 
 //
 // main
@@ -486,6 +517,7 @@ int main() {
    test_eval_exec_array_nest();
    test_eval_exec_array_eval();
    test_eval_exec_array_eval_nest();
+   test_eval_ifelse_num();
 
    cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
 
