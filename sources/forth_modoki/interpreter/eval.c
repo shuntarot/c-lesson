@@ -65,7 +65,7 @@ static struct TokenArray* compile_exec_array(int prev_ch) {
    struct TokenArray* exec_array;
    struct TokenArray* ret;
 
-   for (int i = 0; i < MAX_NAME_OP_NUMBERS; i++) {
+   for (int i = 0; i < MAX_NAME_OP_NUMBERS;) {
       ch = parse_one(ch, &token);
       if (token.ltype == CLOSE_CURLY) {
          num_token = i;
@@ -76,7 +76,10 @@ static struct TokenArray* compile_exec_array(int prev_ch) {
          token.u.bytecodes = exec_array;
          ch = ' ';
       }
-      arr[i] = token;
+
+      if (token.ltype != SPACE) {
+         arr[i++] = token;
+      }
    }
    ret = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * num_token);
    ret->len = num_token;
@@ -384,24 +387,20 @@ static void test_eval_exec_array_mult() {
 static void test_eval_exec_array_nest() {
    char *input = "{1 {2} 3}";
 
-   Token_t tnest = {NUMBER, {2}}; 
+   Token_t tnest = {NUMBER, {2}};
    struct TokenArray* bc_nest = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * 1);
    bc_nest->len = 1;
-   bc_nest->token[0] = tnest; 
+   bc_nest->token[0] = tnest;
 
    Token_t t0 = {NUMBER, {1}};
-   Token_t t1 = {SPACE, {0}};
-   Token_t t2 = {EXEC_ARRAY, .u.bytecodes=bc_nest};
-   Token_t t3 = {SPACE, {0}};
-   Token_t t4 = {NUMBER, {3}};
-   
-   struct TokenArray* bc = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * 5);
-   bc->len = 5;
+   Token_t t1 = {EXEC_ARRAY, .u.bytecodes=bc_nest};
+   Token_t t2 = {NUMBER, {3}};
+
+   struct TokenArray* bc = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * 3);
+   bc->len = 3;
    bc->token[0] = t0;
    bc->token[1] = t1;
    bc->token[2] = t2;
-   bc->token[3] = t3;
-   bc->token[4] = t4;
 
    Token_t expect = {EXEC_ARRAY, .u.bytecodes=bc};
 
@@ -416,7 +415,7 @@ static void test_eval_exec_array_nest() {
 }
 
 static void test_eval_exec_array_eval() {
-   char *input = "/foo {1 2 add} def foo";   
+   char *input = "/foo {1 2 add} def foo";
    int expect = 3;
 
    cl_getc_set_src(input);
@@ -432,7 +431,7 @@ static void test_eval_exec_array_eval() {
 
 static void test_eval_exec_array_eval_nest() {
    char *input = "/ZZ {6} def /YY {4 ZZ 5} def /XX {1 2 YY 3} def XX";
-   
+
    Token_t expect0 = {NUMBER, {1}};
    Token_t expect1 = {NUMBER, {2}};
    Token_t expect2 = {NUMBER, {4}};
@@ -449,7 +448,7 @@ static void test_eval_exec_array_eval_nest() {
    Token_t actual3 = {UNKNOWN, {0}};
    Token_t actual4 = {UNKNOWN, {0}};
    Token_t actual5 = {UNKNOWN, {0}};
-   
+
    stack_pop(&actual5);
    stack_pop(&actual4);
    stack_pop(&actual3);
