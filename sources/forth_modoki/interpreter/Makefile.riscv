@@ -1,0 +1,30 @@
+TARGET := interp-riscv
+SRCS   := cl_getc.c dict.c eval.c parser.c stack.c
+
+XLEN   := 64
+CC      =$(RISCV)/bin/riscv$(XLEN)-unknown-elf-gcc
+OBJCOPY =$(RISCV)/bin/riscv$(XLEN)-unknown-elf-objcopy
+OBJDUMP =$(RISCV)/bin/riscv$(XLEN)-unknown-elf-objdump
+CFLAGS +=-Wall -I. -g
+LFLAGS +=
+
+all: $(TARGET)
+
+$(TARGET): $(SRCS) clesson.h
+	$(CC) $(CFLAGS) $(LFLAGS) -o $@ $(filter %.c, $^)
+
+%.bin: %
+	$(OBJCOPY) -O binary $< $@
+
+%.hex: %
+	od -t x4 -An -w4 -v $< > $@
+
+%.dis: %
+	$(OBJDUMP) -d $< > $@
+
+SPIKE_ARGS ?= pk
+run: $(TARGET)
+	$(RISCV)/bin/spike $(SPIKE_ARGS) $<
+
+clean:
+	-rm -f $(TARGET) *.bin *.hex *.dis
