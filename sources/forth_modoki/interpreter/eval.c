@@ -53,6 +53,17 @@ static void sel_op() {
    }
 }
 
+static void rep_op() {
+   Token_t rs;
+   Token_t rt;
+   stack_pop(&rs);
+   stack_pop(&rt);
+   printf("rt.u.number %d\n", rt.u.number);
+   for (int i = 0; i < rt.u.number; i++) {
+      stack_push(&rs);
+   }
+}
+
 static void register_primitives() {
    Token_t def = {.ltype=ELEMENT_C_FUNC, .u.cfunc=def_op};
    dict_put("def", &def);
@@ -71,6 +82,9 @@ static void register_primitives() {
 
    Token_t sel = {.ltype=ELEMENT_C_FUNC, .u.cfunc=sel_op};
    dict_put("ifelse", &sel);
+
+   Token_t rep = {.ltype=ELEMENT_C_FUNC, .u.cfunc=rep_op};
+   dict_put("repeat", &rep);
 }
 
 #define MAX_NAME_OP_NUMBERS 256
@@ -497,27 +511,75 @@ static void test_eval_ifelse_num() {
    stack_clear();
 }
 
+static void test_eval_ifelse_exec() {
+   char *input = "/foo 0 {1 add} {2 add} ifelse def 5 foo";
+   int expect = 7;
+
+   cl_getc_set_src(input);
+
+   eval();
+
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+   assert_token_number(expect, &actual);
+
+   stack_clear();
+}
+
+static void test_eval_repeat() {
+   char *input = "3 {1 2} repeat";
+   int expect0 = 1;
+   int expect1 = 2;
+
+   cl_getc_set_src(input);
+
+   eval();
+
+   Token_t actual0 = {UNKNOWN, {0}};
+   Token_t actual1 = {UNKNOWN, {0}};
+   Token_t actual2 = {UNKNOWN, {0}};
+   Token_t actual3 = {UNKNOWN, {0}};
+   Token_t actual4 = {UNKNOWN, {0}};
+   Token_t actual5 = {UNKNOWN, {0}};
+   stack_pop(&actual0);
+   stack_pop(&actual1);
+   stack_pop(&actual2);
+   stack_pop(&actual3);
+   stack_pop(&actual4);
+   stack_pop(&actual5);
+   assert_token_number(expect0, &actual0);
+   assert_token_number(expect1, &actual1);
+   assert_token_number(expect0, &actual2);
+   assert_token_number(expect1, &actual3);
+   assert_token_number(expect0, &actual4);
+   assert_token_number(expect1, &actual5);
+
+   stack_clear();
+}
+
 //
 // main
 //
 
 int main() {
    register_primitives();
-   test_eval_num_one();
-   test_eval_num_two();
-   test_eval_num_add();
-   test_eval_literal();
-   test_eval_num_sub();
-   test_eval_num_mul();
-   test_eval_num_div();
-   test_eval_exec_array1();
-   test_eval_exec_array2();
-   test_eval_exec_array3();
-   test_eval_exec_array_mult();
-   test_eval_exec_array_nest();
-   test_eval_exec_array_eval();
-   test_eval_exec_array_eval_nest();
-   test_eval_ifelse_num();
+   /* test_eval_num_one(); */
+   /* test_eval_num_two(); */
+   /* test_eval_num_add(); */
+   /* test_eval_literal(); */
+   /* test_eval_num_sub(); */
+   /* test_eval_num_mul(); */
+   /* test_eval_num_div(); */
+   /* test_eval_exec_array1(); */
+   /* test_eval_exec_array2(); */
+   /* test_eval_exec_array3(); */
+   /* test_eval_exec_array_mult(); */
+   /* test_eval_exec_array_nest(); */
+   /* test_eval_exec_array_eval(); */
+   /* test_eval_exec_array_eval_nest(); */
+   /* test_eval_ifelse_num(); */
+   /* test_eval_ifelse_exec(); */
+   test_eval_repeat();
 
    cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
 
