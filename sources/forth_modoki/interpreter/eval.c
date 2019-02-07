@@ -4,6 +4,8 @@
 // c function
 //
 
+void eval_exec_array(struct TokenArray* exec_array);
+
 static void def_op() {
    Token_t rs;
    Token_t rt;
@@ -58,9 +60,9 @@ static void rep_op() {
    Token_t rt;
    stack_pop(&rs);
    stack_pop(&rt);
-   printf("rt.u.number %d\n", rt.u.number);
+   //printf("rt.u.number %d\n", rt.u.number);
    for (int i = 0; i < rt.u.number; i++) {
-      stack_push(&rs);
+      eval_exec_array(rs.u.bytecodes);
    }
 }
 
@@ -547,12 +549,12 @@ static void test_eval_repeat() {
    stack_pop(&actual3);
    stack_pop(&actual4);
    stack_pop(&actual5);
-   assert_token_number(expect0, &actual0);
-   assert_token_number(expect1, &actual1);
-   assert_token_number(expect0, &actual2);
-   assert_token_number(expect1, &actual3);
-   assert_token_number(expect0, &actual4);
-   assert_token_number(expect1, &actual5);
+   assert_token_number(expect1, &actual0);
+   assert_token_number(expect0, &actual1);
+   assert_token_number(expect1, &actual2);
+   assert_token_number(expect0, &actual3);
+   assert_token_number(expect1, &actual4);
+   assert_token_number(expect0, &actual5);
 
    stack_clear();
 }
@@ -563,22 +565,22 @@ static void test_eval_repeat() {
 
 int main() {
    register_primitives();
-   /* test_eval_num_one(); */
-   /* test_eval_num_two(); */
-   /* test_eval_num_add(); */
-   /* test_eval_literal(); */
-   /* test_eval_num_sub(); */
-   /* test_eval_num_mul(); */
-   /* test_eval_num_div(); */
-   /* test_eval_exec_array1(); */
-   /* test_eval_exec_array2(); */
-   /* test_eval_exec_array3(); */
-   /* test_eval_exec_array_mult(); */
-   /* test_eval_exec_array_nest(); */
-   /* test_eval_exec_array_eval(); */
-   /* test_eval_exec_array_eval_nest(); */
-   /* test_eval_ifelse_num(); */
-   /* test_eval_ifelse_exec(); */
+   test_eval_num_one();
+   test_eval_num_two();
+   test_eval_num_add();
+   test_eval_literal();
+   test_eval_num_sub();
+   test_eval_num_mul();
+   test_eval_num_div();
+   test_eval_exec_array1();
+   test_eval_exec_array2();
+   test_eval_exec_array3();
+   test_eval_exec_array_mult();
+   test_eval_exec_array_nest();
+   test_eval_exec_array_eval();
+   test_eval_exec_array_eval_nest();
+   test_eval_ifelse_num();
+   test_eval_ifelse_exec();
    test_eval_repeat();
 
    cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
