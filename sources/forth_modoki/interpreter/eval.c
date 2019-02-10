@@ -559,6 +559,62 @@ static void test_eval_repeat() {
    stack_clear();
 }
 
+static void test_op_eq_true() {
+   char *input = "1 1 eq";
+   int expect = 1;
+   
+   cl_getc_set_src(input);
+   eval();
+
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+   assert_token_number(expect, &actual);
+   
+   stack_clear();
+}
+
+static void test_op_eq_false() {
+   char *input = "1 2 eq";
+   int expect = 0;
+   
+   cl_getc_set_src(input);
+   eval();
+
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+   assert_token_number(expect, &actual);
+   
+   stack_clear();
+}
+
+static void test_op_neq_false() {
+   char *input = "1 1 neq";
+   int expect = 0;
+   
+   cl_getc_set_src(input);
+   eval();
+
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+   assert_token_number(expect, &actual);
+   
+   stack_clear();
+}
+
+static void test_op_neq_true() {
+   char *input = "1 2 neq";
+   int expect = 1;
+   
+   cl_getc_set_src(input);
+   eval();
+
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+   assert_token_number(expect, &actual);
+   
+   stack_clear();
+}
+
 //
 // main
 //
@@ -582,7 +638,11 @@ int main() {
    test_eval_ifelse_num();
    test_eval_ifelse_exec();
    test_eval_repeat();
-
+   test_op_eq_true();
+   test_op_eq_false();
+   test_op_neq_true();
+   test_op_neq_false();
+   
    cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
 
    eval();
