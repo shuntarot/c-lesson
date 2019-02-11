@@ -66,6 +66,22 @@ static void rep_op() {
    }
 }
 
+static void eq_op() {
+   two_op( == );
+}
+
+static void neq_op() {
+   two_op( != );
+}
+
+static void gt_op() {
+   two_op( > );
+}
+
+static void ge_op() {
+   two_op( >= );
+}
+
 static void register_primitives() {
    Token_t def = {.ltype=ELEMENT_C_FUNC, .u.cfunc=def_op};
    dict_put("def", &def);
@@ -87,7 +103,20 @@ static void register_primitives() {
 
    Token_t rep = {.ltype=ELEMENT_C_FUNC, .u.cfunc=rep_op};
    dict_put("repeat", &rep);
+
+   Token_t eq = {.ltype=ELEMENT_C_FUNC, .u.cfunc=eq_op};
+   dict_put("eq", &eq);
+   
+   Token_t neq = {.ltype=ELEMENT_C_FUNC, .u.cfunc=neq_op};
+   dict_put("neq", &neq);
+
+   Token_t gt = {.ltype=ELEMENT_C_FUNC, .u.cfunc=gt_op};
+   dict_put("gt", &gt);
+
+   Token_t ge = {.ltype=ELEMENT_C_FUNC, .u.cfunc=ge_op};
+   dict_put("ge", &ge);
 }
+
 
 #define MAX_NAME_OP_NUMBERS 256
 static struct TokenArray* compile_exec_array(int prev_ch) {
@@ -615,6 +644,48 @@ static void test_op_neq_true() {
    stack_clear();
 }
 
+static void test_op_gt_true() {
+   char *input = "4 2 gt";
+   int expect = 1;
+   
+   cl_getc_set_src(input);
+   eval();
+
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+   assert_token_number(expect, &actual);
+   
+   stack_clear();
+}
+
+static void test_op_ge_true() {
+   char *input = "4 4 ge";
+   int expect = 1;
+   
+   cl_getc_set_src(input);
+   eval();
+
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+   assert_token_number(expect, &actual);
+   
+   stack_clear();
+}
+
+static void test_op_gt_false() {
+   char *input = "4 4 gt";
+   int expect = 0;
+   
+   cl_getc_set_src(input);
+   eval();
+
+   Token_t actual = {UNKNOWN, {0}};
+   stack_pop(&actual);
+   assert_token_number(expect, &actual);
+   
+   stack_clear();
+}
+
 //
 // main
 //
@@ -642,6 +713,9 @@ int main() {
    test_op_eq_false();
    test_op_neq_true();
    test_op_neq_false();
+   test_op_gt_true();
+   test_op_gt_false();
+   test_op_ge_true();
    
    cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
 
