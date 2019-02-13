@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/interp",
-            "args": [],
+            "args": ["--eval-command=set startup-with-shell off"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
