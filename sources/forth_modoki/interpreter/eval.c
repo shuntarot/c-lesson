@@ -79,6 +79,24 @@ static void pop_op()
     stack_pop(&rs);
 }
 
+static void exch_op()
+{
+    Token_t rs;
+    Token_t rt;
+    stack_pop(&rs);
+    stack_pop(&rt);
+    stack_push(&rs);
+    stack_push(&rt);
+}
+
+static void dup_op()
+{
+    Token_t rs;
+    stack_pop(&rs);
+    stack_push(&rs);
+    stack_push(&rs);
+}
+
 static void eq_op()
 {
     two_op(==);
@@ -152,6 +170,12 @@ static void register_primitives()
 
     Token_t pop = {.ltype = ELEMENT_C_FUNC, .u.cfunc = pop_op };
     dict_put("pop", &pop);
+
+    Token_t exch = {.ltype = ELEMENT_C_FUNC, .u.cfunc = exch_op };
+    dict_put("exch", &exch);
+
+    Token_t dup = {.ltype = ELEMENT_C_FUNC, .u.cfunc = dup_op };
+    dict_put("dup", &dup);
 }
 
 #define MAX_NAME_OP_NUMBERS 256
@@ -797,6 +821,46 @@ static void test_op_pop()
     stack_clear();
 }
 
+static void test_op_exch()
+{
+    char* input   = "1 2 exch";
+    int   expect1 = 1;
+    int   expect2 = 2;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    Token_t actual1 = { UNKNOWN, { 0 } };
+    Token_t actual2 = { UNKNOWN, { 0 } };
+    stack_pop(&actual1);
+    stack_pop(&actual2);
+    assert_token_number(expect1, &actual1);
+    assert_token_number(expect2, &actual2);
+
+    stack_clear();
+}
+
+static void test_op_dup()
+{
+    char* input   = "3 4 5 8 dup";
+    int   expect1 = 8;
+    int   expect2 = 8;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    Token_t actual1 = { UNKNOWN, { 0 } };
+    Token_t actual2 = { UNKNOWN, { 0 } };
+    stack_pop(&actual1);
+    stack_pop(&actual2);
+    assert_token_number(expect1, &actual1);
+    assert_token_number(expect2, &actual2);
+
+    stack_clear();
+}
+
 //
 // main
 //
@@ -832,6 +896,8 @@ int main()
     test_op_lt_true();
     test_op_le_true();
     test_op_pop();
+    test_op_exch();
+    test_op_dup();
 
     // add, sub, div, mul
     // eq, neq, gt, ge, lt, le
