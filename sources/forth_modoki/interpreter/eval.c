@@ -46,22 +46,22 @@ static void div_op()
     two_op(/);
 }
 
-static void sel_op()
+static void ifelse_op()
 {
     Token_t rs;
     Token_t rt;
-    Token_t sel;
+    Token_t ifelse;
     stack_pop(&rs);
     stack_pop(&rt);
-    stack_pop(&sel);
-    if (sel.u.number) {
+    stack_pop(&ifelse);
+    if (ifelse.u.number) {
         stack_push(&rt);
     } else {
         stack_push(&rs);
     }
 }
 
-static void rep_op()
+static void repeat_op()
 {
     Token_t rs;
     Token_t rt;
@@ -71,6 +71,12 @@ static void rep_op()
     for (int i = 0; i < rt.u.number; i++) {
         eval_exec_array(rs.u.bytecodes);
     }
+}
+
+static void pop_op()
+{
+    Token_t rs;
+    stack_pop(&rs);
 }
 
 static void eq_op()
@@ -93,6 +99,16 @@ static void ge_op()
     two_op(>=);
 }
 
+static void lt_op()
+{
+    two_op(<);
+}
+
+static void le_op()
+{
+    two_op(<=);
+}
+
 static void register_primitives()
 {
     Token_t def = {.ltype = ELEMENT_C_FUNC, .u.cfunc = def_op };
@@ -110,11 +126,11 @@ static void register_primitives()
     Token_t div = {.ltype = ELEMENT_C_FUNC, .u.cfunc = div_op };
     dict_put("div", &div);
 
-    Token_t sel = {.ltype = ELEMENT_C_FUNC, .u.cfunc = sel_op };
-    dict_put("ifelse", &sel);
+    Token_t ifelse = {.ltype = ELEMENT_C_FUNC, .u.cfunc = ifelse_op };
+    dict_put("ifelse", &ifelse);
 
-    Token_t rep = {.ltype = ELEMENT_C_FUNC, .u.cfunc = rep_op };
-    dict_put("repeat", &rep);
+    Token_t repeat = {.ltype = ELEMENT_C_FUNC, .u.cfunc = repeat_op };
+    dict_put("repeat", &repeat);
 
     Token_t eq = {.ltype = ELEMENT_C_FUNC, .u.cfunc = eq_op };
     dict_put("eq", &eq);
@@ -127,6 +143,15 @@ static void register_primitives()
 
     Token_t ge = {.ltype = ELEMENT_C_FUNC, .u.cfunc = ge_op };
     dict_put("ge", &ge);
+
+    Token_t lt = {.ltype = ELEMENT_C_FUNC, .u.cfunc = lt_op };
+    dict_put("lt", &lt);
+
+    Token_t le = {.ltype = ELEMENT_C_FUNC, .u.cfunc = le_op };
+    dict_put("le", &le);
+
+    Token_t pop = {.ltype = ELEMENT_C_FUNC, .u.cfunc = pop_op };
+    dict_put("pop", &pop);
 }
 
 #define MAX_NAME_OP_NUMBERS 256
@@ -726,6 +751,52 @@ static void test_op_gt_false()
     stack_clear();
 }
 
+static void test_op_lt_true()
+{
+    char* input  = "1 100 lt";
+    int   expect = 1;
+
+    cl_getc_set_src(input);
+    eval();
+
+    Token_t actual = { UNKNOWN, { 0 } };
+    stack_pop(&actual);
+    assert_token_number(expect, &actual);
+
+    stack_clear();
+}
+
+static void test_op_le_true()
+{
+    char* input  = "100 100 le";
+    int   expect = 1;
+
+    cl_getc_set_src(input);
+    eval();
+
+    Token_t actual = { UNKNOWN, { 0 } };
+    stack_pop(&actual);
+    assert_token_number(expect, &actual);
+
+    stack_clear();
+}
+
+static void test_op_pop()
+{
+    char* input  = "1 2 3 4 5 6 pop pop pop";
+    int   expect = 3;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    Token_t actual = { UNKNOWN, { 0 } };
+    stack_pop(&actual);
+    assert_token_number(expect, &actual);
+
+    stack_clear();
+}
+
 //
 // main
 //
@@ -733,6 +804,7 @@ static void test_op_gt_false()
 int main()
 {
     register_primitives();
+
     test_eval_num_one();
     test_eval_num_two();
     test_eval_num_add();
@@ -757,6 +829,15 @@ int main()
     test_op_gt_true();
     test_op_gt_false();
     test_op_ge_true();
+    test_op_lt_true();
+    test_op_le_true();
+    test_op_pop();
+
+    // add, sub, div, mul
+    // eq, neq, gt, ge, lt, le
+
+    // pop, exch, dup, index, roll
+    // exec, if, ifelse, repeat, while
 
     cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
 
