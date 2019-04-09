@@ -73,6 +73,42 @@ static void repeat_op()
     }
 }
 
+static void exec_op()
+{
+    Token_t rs;
+    stack_pop(&rs);
+    eval_exec_array(rs.u.bytecodes);
+}
+
+static void if_op()
+{
+    Token_t rs;
+    Token_t rt;
+    stack_pop(&rs);
+    stack_pop(&rt);
+    if (rt.u.number) {
+        eval_exec_array(rs.u.bytecodes);
+    }
+}
+
+static void while_op()
+{
+    Token_t rexe;
+    Token_t rcon;
+    stack_pop(&rexe);
+    stack_pop(&rcon);
+
+    Token_t rs;
+    eval_exec_array(rcon.u.bytecodes);
+    stack_pop(&rs);
+
+    while (rs.u.number) {
+        eval_exec_array(rexe.u.bytecodes);
+        eval_exec_array(rcon.u.bytecodes);
+        stack_pop(&rs);
+    }
+}
+
 static void pop_op()
 {
     Token_t rs;
@@ -188,6 +224,15 @@ static void register_primitives()
 
     Token_t repeat = {.ltype = ELEMENT_C_FUNC, .u.cfunc = repeat_op };
     dict_put("repeat", &repeat);
+
+    Token_t exec = {.ltype = ELEMENT_C_FUNC, .u.cfunc = exec_op };
+    dict_put("exec", &exec);
+
+    Token_t iff = {.ltype = ELEMENT_C_FUNC, .u.cfunc = if_op };
+    dict_put("if", &iff);
+
+    Token_t whilee = {.ltype = ELEMENT_C_FUNC, .u.cfunc = while_op };
+    dict_put("while", &whilee);
 
     Token_t eq = {.ltype = ELEMENT_C_FUNC, .u.cfunc = eq_op };
     dict_put("eq", &eq);
@@ -961,6 +1006,55 @@ static void test_op_roll()
 
     stack_clear();
 }
+
+static void test_op_exec()
+{
+    char* input  = "{1 2 add} exec";
+    int   expect = 3;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    Token_t actual = { UNKNOWN, { 0 } };
+    stack_pop(&actual);
+    assert_token_number(expect, &actual);
+
+    stack_clear();
+}
+
+static void test_op_if()
+{
+    char* input  = "8 1 {1 2 add} if";
+    int   expect = 3;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    Token_t actual = { UNKNOWN, { 0 } };
+    stack_pop(&actual);
+    assert_token_number(expect, &actual);
+
+    stack_clear();
+}
+
+static void test_op_while()
+{
+    char* input  = "4 dup {dup 1 gt} {1 sub exch 1 index mul exch} while pop";
+    int   expect = 24; // 4!
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    Token_t actual = { UNKNOWN, { 0 } };
+    stack_pop(&actual);
+    assert_token_number(expect, &actual);
+
+    stack_clear();
+}
+
 //
 // main
 //
@@ -1000,11 +1094,10 @@ int main()
     test_op_dup();
     test_op_index();
     test_op_roll();
+    test_op_exec();
+    test_op_if();
+    test_op_while();
 
-    // add, sub, div, mul
-    // eq, neq, gt, ge, lt, le
-
-    // pop, exch, dup, index, roll
     // exec, if, ifelse, repeat, while
 
     cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
