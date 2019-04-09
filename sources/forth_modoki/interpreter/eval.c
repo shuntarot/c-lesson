@@ -111,6 +111,31 @@ static void index_op()
     stack_push(&rt[rs.u.number]);
 }
 
+static void roll_op()
+{
+    Token_t rs;
+    Token_t rt[STACK_SIZE];
+    int     range;
+    int     rot;
+
+    stack_pop(&rs);
+    rot = rs.u.number;
+    stack_pop(&rs);
+    range = rs.u.number;
+
+    if (range < 2)
+        return;
+
+    for (int i = 0; i < range; i++) {
+        stack_pop(&rt[i]);
+    }
+
+    for (int i = 0; i < range; i++) {
+        int idx = (rot + range - i - 1) % range;
+        stack_push(&rt[idx]);
+    }
+}
+
 static void eq_op()
 {
     two_op(==);
@@ -193,6 +218,9 @@ static void register_primitives()
 
     Token_t index = {.ltype = ELEMENT_C_FUNC, .u.cfunc = index_op };
     dict_put("index", &index);
+
+    Token_t roll = {.ltype = ELEMENT_C_FUNC, .u.cfunc = roll_op };
+    dict_put("roll", &roll);
 }
 
 #define MAX_NAME_OP_NUMBERS 256
@@ -902,6 +930,37 @@ static void test_op_index()
     stack_clear();
 }
 
+static void test_op_roll()
+{
+    char* input   = "1 2 3 4 5 6 7 4 3 roll";
+    int   expect1 = 4;
+    int   expect2 = 7;
+    int   expect3 = 6;
+    int   expect4 = 5;
+    int   expect5 = 3;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    Token_t actual1 = { UNKNOWN, { 0 } };
+    Token_t actual2 = { UNKNOWN, { 0 } };
+    Token_t actual3 = { UNKNOWN, { 0 } };
+    Token_t actual4 = { UNKNOWN, { 0 } };
+    Token_t actual5 = { UNKNOWN, { 0 } };
+    stack_pop(&actual1);
+    stack_pop(&actual2);
+    stack_pop(&actual3);
+    stack_pop(&actual4);
+    stack_pop(&actual5);
+    assert_token_number(expect1, &actual1);
+    assert_token_number(expect2, &actual2);
+    assert_token_number(expect3, &actual3);
+    assert_token_number(expect4, &actual4);
+    assert_token_number(expect5, &actual5);
+
+    stack_clear();
+}
 //
 // main
 //
@@ -940,6 +999,7 @@ int main()
     test_op_exch();
     test_op_dup();
     test_op_index();
+    test_op_roll();
 
     // add, sub, div, mul
     // eq, neq, gt, ge, lt, le
