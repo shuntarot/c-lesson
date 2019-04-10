@@ -1055,6 +1055,38 @@ static void test_op_while()
     stack_clear();
 }
 
+static void test_lf()
+{
+    char* input  = "1 2\n3 4";
+    int   expect = 4;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    Token_t actual = { UNKNOWN, { 0 } };
+    stack_pop(&actual);
+    assert_token_number(expect, &actual);
+
+    stack_clear();
+}
+
+static void test_comment()
+{
+    char* input  = "1 2\n3 4 %foo bar";
+    int   expect = 4;
+
+    cl_getc_set_src(input);
+
+    eval();
+
+    Token_t actual = { UNKNOWN, { 0 } };
+    stack_pop(&actual);
+    assert_token_number(expect, &actual);
+
+    stack_clear();
+}
+
 //
 // main
 //
@@ -1097,8 +1129,8 @@ int main()
     test_op_exec();
     test_op_if();
     test_op_while();
-
-    // exec, if, ifelse, repeat, while
+    test_lf();
+    test_comment();
 
     cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
 

@@ -56,6 +56,25 @@ int parse_one(int prev_ch, Token_t* out_token)
         return ch;
     }
 
+    if (prev_ch == '\n') {
+        ch               = cl_getc();
+        out_token->ltype = SPACE;
+        return ch;
+    }
+
+    if (prev_ch == '%') {
+        for (;;) {
+            ch = cl_getc();
+            if (ch == '\n')
+                break;
+            if (ch == EOF)
+                break;
+        }
+
+        out_token->ltype = SPACE;
+        return ch;
+    }
+
     if (is_alpha(prev_ch)) {
         int i     = 0;
         name[i++] = prev_ch;
