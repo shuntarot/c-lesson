@@ -2,6 +2,7 @@
 
 static const char* input = "123 456";
 static int         pos   = 0;
+static FILE*       fd    = NULL;
 
 void cl_getc_set_src(char* str)
 {
@@ -11,9 +12,29 @@ void cl_getc_set_src(char* str)
 
 int cl_getc()
 {
-    if (strlen(input) == pos)
-        return EOF;
-    return input[pos++];
+    if (fd) {
+        return fgetc(fd);
+    } else {
+        if (strlen(input) == pos)
+            return EOF;
+        return input[pos++];
+    }
+}
+
+int cl_fopen(char* filename)
+{
+    fd = fopen(filename, "r");
+
+    if (fd == NULL)
+        return errno;
+
+    return 0;
+}
+
+void cl_fclose()
+{
+    if (fd)
+        fclose(fd);
 }
 
 size_t cl_strlen(const char* s)

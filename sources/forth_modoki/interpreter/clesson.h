@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -80,6 +81,10 @@ int streq(const char* s1, const char* s2);
   return EOF if end of file.
 */
 int cl_getc();
+
+int cl_fopen();
+
+void cl_fclose();
 
 void cl_getc_set_src(char* str);
 

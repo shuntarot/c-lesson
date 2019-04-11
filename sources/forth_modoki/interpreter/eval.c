@@ -204,67 +204,67 @@ static void le_op()
 
 static void register_primitives()
 {
-    Token_t def = {.ltype = ELEMENT_C_FUNC, .u.cfunc = def_op };
+    Token_t def = { .ltype = ELEMENT_C_FUNC, .u.cfunc = def_op };
     dict_put("def", &def);
 
-    Token_t add = {.ltype = ELEMENT_C_FUNC, .u.cfunc = add_op };
+    Token_t add = { .ltype = ELEMENT_C_FUNC, .u.cfunc = add_op };
     dict_put("add", &add);
 
-    Token_t sub = {.ltype = ELEMENT_C_FUNC, .u.cfunc = sub_op };
+    Token_t sub = { .ltype = ELEMENT_C_FUNC, .u.cfunc = sub_op };
     dict_put("sub", &sub);
 
-    Token_t mul = {.ltype = ELEMENT_C_FUNC, .u.cfunc = mul_op };
+    Token_t mul = { .ltype = ELEMENT_C_FUNC, .u.cfunc = mul_op };
     dict_put("mul", &mul);
 
-    Token_t div = {.ltype = ELEMENT_C_FUNC, .u.cfunc = div_op };
+    Token_t div = { .ltype = ELEMENT_C_FUNC, .u.cfunc = div_op };
     dict_put("div", &div);
 
-    Token_t ifelse = {.ltype = ELEMENT_C_FUNC, .u.cfunc = ifelse_op };
+    Token_t ifelse = { .ltype = ELEMENT_C_FUNC, .u.cfunc = ifelse_op };
     dict_put("ifelse", &ifelse);
 
-    Token_t repeat = {.ltype = ELEMENT_C_FUNC, .u.cfunc = repeat_op };
+    Token_t repeat = { .ltype = ELEMENT_C_FUNC, .u.cfunc = repeat_op };
     dict_put("repeat", &repeat);
 
-    Token_t exec = {.ltype = ELEMENT_C_FUNC, .u.cfunc = exec_op };
+    Token_t exec = { .ltype = ELEMENT_C_FUNC, .u.cfunc = exec_op };
     dict_put("exec", &exec);
 
-    Token_t iff = {.ltype = ELEMENT_C_FUNC, .u.cfunc = if_op };
+    Token_t iff = { .ltype = ELEMENT_C_FUNC, .u.cfunc = if_op };
     dict_put("if", &iff);
 
-    Token_t whilee = {.ltype = ELEMENT_C_FUNC, .u.cfunc = while_op };
+    Token_t whilee = { .ltype = ELEMENT_C_FUNC, .u.cfunc = while_op };
     dict_put("while", &whilee);
 
-    Token_t eq = {.ltype = ELEMENT_C_FUNC, .u.cfunc = eq_op };
+    Token_t eq = { .ltype = ELEMENT_C_FUNC, .u.cfunc = eq_op };
     dict_put("eq", &eq);
 
-    Token_t neq = {.ltype = ELEMENT_C_FUNC, .u.cfunc = neq_op };
+    Token_t neq = { .ltype = ELEMENT_C_FUNC, .u.cfunc = neq_op };
     dict_put("neq", &neq);
 
-    Token_t gt = {.ltype = ELEMENT_C_FUNC, .u.cfunc = gt_op };
+    Token_t gt = { .ltype = ELEMENT_C_FUNC, .u.cfunc = gt_op };
     dict_put("gt", &gt);
 
-    Token_t ge = {.ltype = ELEMENT_C_FUNC, .u.cfunc = ge_op };
+    Token_t ge = { .ltype = ELEMENT_C_FUNC, .u.cfunc = ge_op };
     dict_put("ge", &ge);
 
-    Token_t lt = {.ltype = ELEMENT_C_FUNC, .u.cfunc = lt_op };
+    Token_t lt = { .ltype = ELEMENT_C_FUNC, .u.cfunc = lt_op };
     dict_put("lt", &lt);
 
-    Token_t le = {.ltype = ELEMENT_C_FUNC, .u.cfunc = le_op };
+    Token_t le = { .ltype = ELEMENT_C_FUNC, .u.cfunc = le_op };
     dict_put("le", &le);
 
-    Token_t pop = {.ltype = ELEMENT_C_FUNC, .u.cfunc = pop_op };
+    Token_t pop = { .ltype = ELEMENT_C_FUNC, .u.cfunc = pop_op };
     dict_put("pop", &pop);
 
-    Token_t exch = {.ltype = ELEMENT_C_FUNC, .u.cfunc = exch_op };
+    Token_t exch = { .ltype = ELEMENT_C_FUNC, .u.cfunc = exch_op };
     dict_put("exch", &exch);
 
-    Token_t dup = {.ltype = ELEMENT_C_FUNC, .u.cfunc = dup_op };
+    Token_t dup = { .ltype = ELEMENT_C_FUNC, .u.cfunc = dup_op };
     dict_put("dup", &dup);
 
-    Token_t index = {.ltype = ELEMENT_C_FUNC, .u.cfunc = index_op };
+    Token_t index = { .ltype = ELEMENT_C_FUNC, .u.cfunc = index_op };
     dict_put("index", &index);
 
-    Token_t roll = {.ltype = ELEMENT_C_FUNC, .u.cfunc = roll_op };
+    Token_t roll = { .ltype = ELEMENT_C_FUNC, .u.cfunc = roll_op };
     dict_put("roll", &roll);
 }
 
@@ -532,7 +532,7 @@ static void test_eval_exec_array1()
     bc->len                  = 1;
     Token_t t0               = { NUMBER, { 1 } };
     bc->token[0]             = t0;
-    Token_t expect = {.ltype = EXEC_ARRAY, .u.bytecodes = bc };
+    Token_t expect           = { .ltype = EXEC_ARRAY, .u.bytecodes = bc };
 
     cl_getc_set_src(input);
     eval();
@@ -549,9 +549,9 @@ static void test_eval_exec_array2()
     char*              input = "{/abc}";
     struct TokenArray* bc    = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * 1);
     bc->len                  = 1;
-    Token_t t0 = {.ltype = LITERAL_NAME, .u.name = "abc" };
-    bc->token[0]   = t0;
-    Token_t expect = {.ltype = EXEC_ARRAY, .u.bytecodes = bc };
+    Token_t t0               = { .ltype = LITERAL_NAME, .u.name = "abc" };
+    bc->token[0]             = t0;
+    Token_t expect           = { .ltype = EXEC_ARRAY, .u.bytecodes = bc };
 
     cl_getc_set_src(input);
     eval();
@@ -568,9 +568,9 @@ static void test_eval_exec_array3()
     char*              input = "{abc}";
     struct TokenArray* bc    = malloc(sizeof(struct TokenArray) + sizeof(Token_t) * 1);
     bc->len                  = 1;
-    Token_t t0 = {.ltype = EXECUTABLE_NAME, .u.name = "abc" };
-    bc->token[0]   = t0;
-    Token_t expect = {.ltype = EXEC_ARRAY, .u.bytecodes = bc };
+    Token_t t0               = { .ltype = EXECUTABLE_NAME, .u.name = "abc" };
+    bc->token[0]             = t0;
+    Token_t expect           = { .ltype = EXEC_ARRAY, .u.bytecodes = bc };
 
     cl_getc_set_src(input);
     eval();
@@ -1091,53 +1091,61 @@ static void test_comment()
 // main
 //
 
-int main()
+int main(int argc, char* argv[])
 {
     register_primitives();
 
-    test_eval_num_one();
-    test_eval_num_two();
-    test_eval_num_add();
-    test_eval_literal();
-    test_eval_num_sub();
-    test_eval_num_mul();
-    test_eval_num_div();
-    test_eval_exec_array1();
-    test_eval_exec_array2();
-    test_eval_exec_array3();
-    test_eval_exec_array_mult();
-    test_eval_exec_array_nest();
-    test_eval_exec_array_eval();
-    test_eval_exec_array_eval_nest();
-    test_eval_ifelse_num();
-    test_eval_ifelse_exec();
-    test_eval_repeat();
-    test_op_eq_true();
-    test_op_eq_false();
-    test_op_neq_true();
-    test_op_neq_false();
-    test_op_gt_true();
-    test_op_gt_false();
-    test_op_ge_true();
-    test_op_lt_true();
-    test_op_le_true();
-    test_op_pop();
-    test_op_exch();
-    test_op_dup();
-    test_op_index();
-    test_op_roll();
-    test_op_exec();
-    test_op_if();
-    test_op_while();
-    test_lf();
-    test_comment();
+    if (argc > 1) {
+        cl_fopen(argv[1]);
+    } else {
+        test_eval_num_one();
+        test_eval_num_two();
+        test_eval_num_add();
+        test_eval_literal();
+        test_eval_num_sub();
+        test_eval_num_mul();
+        test_eval_num_div();
+        test_eval_exec_array1();
+        test_eval_exec_array2();
+        test_eval_exec_array3();
+        test_eval_exec_array_mult();
+        test_eval_exec_array_nest();
+        test_eval_exec_array_eval();
+        test_eval_exec_array_eval_nest();
+        test_eval_ifelse_num();
+        test_eval_ifelse_exec();
+        test_eval_repeat();
+        test_op_eq_true();
+        test_op_eq_false();
+        test_op_neq_true();
+        test_op_neq_false();
+        test_op_gt_true();
+        test_op_gt_false();
+        test_op_ge_true();
+        test_op_lt_true();
+        test_op_le_true();
+        test_op_pop();
+        test_op_exch();
+        test_op_dup();
+        test_op_index();
+        test_op_roll();
+        test_op_exec();
+        test_op_if();
+        test_op_while();
+        test_lf();
+        test_comment();
 
-    cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
+        cl_getc_set_src("/foo 55 def /bar 11 def 1 foo add bar add 1 sub 11 div");
+    }
 
+    // main loop
     eval();
+
     Token_t token = { UNKNOWN, { 0 } };
     stack_pop(&token);
     printf("result: %d\n", token.u.number);
+
+    cl_fclose();
 
     return 1;
 }
