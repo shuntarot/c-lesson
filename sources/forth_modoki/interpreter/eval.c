@@ -320,6 +320,9 @@ void eval_exec_array(struct TokenArray* exec_array)
         case LITERAL_NAME:
             stack_push(&token);
             break;
+        case EXEC_ARRAY:
+            stack_push(&token);
+            break;
         case EXECUTABLE_NAME:
             if (dict_get(token.u.name, &token)) {
                 if (token.ltype == NUMBER) {
@@ -1177,8 +1180,8 @@ int main(int argc, char* argv[])
         test_op_exec();
         test_op_if();
         test_op_while();
-        // test_op_mult_exec();
-        // test_op_while_deep();
+        test_op_mult_exec();
+        test_op_while_deep();
         test_lf();
         test_comment();
 
