@@ -317,18 +317,28 @@ void eval_exec_array(struct TokenArray* exec_array)
         case NUMBER:
             stack_push(&token);
             break;
-        case ELEMENT_C_FUNC:
-            token.u.cfunc();
-            break;
-        case EXEC_ARRAY:
-            eval_exec_array(token.u.bytecodes);
-            break;
-        case EXECUTABLE_NAME:
-            stack_push(&token);
-            break;
         case LITERAL_NAME:
             stack_push(&token);
             break;
+        case EXECUTABLE_NAME:
+            if (dict_get(token.u.name, &token)) {
+                if (token.ltype == NUMBER) {
+                    stack_push(&token);
+                    break;
+                } else if (token.ltype == ELEMENT_C_FUNC) {
+                    token.u.cfunc();
+                    break;
+                } else if (token.ltype == EXEC_ARRAY) {
+                    eval_exec_array(token.u.bytecodes);
+                    break;
+                } else {
+                    printf("Unexpected token.ltype: %d\n", token.ltype);
+                    break;
+                }
+            } else {
+                printf("Unknown EXECUTABLE_NAME: %s\n", token.u.name);
+                break;
+            }
         case SPACE:
             break;
         default:
@@ -350,25 +360,30 @@ void eval()
 
             switch (token.ltype) {
             case NUMBER:
-                /* printf("NUMBER: %d\n", token.u.number); */
-                stack_push(&token);
-                break;
-            case ELEMENT_C_FUNC:
-                /* printf("ELEMENT_C_FUNC\n"); */
-                token.u.cfunc();
-                break;
-            case EXEC_ARRAY:
-                // printf("EXEC_ARRAY\n");
-                eval_exec_array(token.u.bytecodes);
-                break;
-            case EXECUTABLE_NAME:
-                /* printf("EXECUTABLE_NAME: %s\n", token.u.name); */
                 stack_push(&token);
                 break;
             case LITERAL_NAME:
-                /* printf("LITERAL_NAME: %s\n", token.u.name); */
                 stack_push(&token);
                 break;
+            case EXECUTABLE_NAME:
+                if (dict_get(token.u.name, &token)) {
+                    if (token.ltype == NUMBER) {
+                        stack_push(&token);
+                        break;
+                    } else if (token.ltype == ELEMENT_C_FUNC) {
+                        token.u.cfunc();
+                        break;
+                    } else if (token.ltype == EXEC_ARRAY) {
+                        eval_exec_array(token.u.bytecodes);
+                        break;
+                    } else {
+                        printf("Unexpected token.ltype: %d\n", token.ltype);
+                        break;
+                    }
+                } else {
+                    printf("Unknown EXECUTABLE_NAME: %s\n", token.u.name);
+                    break;
+                }
             case OPEN_CURLY:
                 exec_arr          = compile_exec_array(ch);
                 token.ltype       = EXEC_ARRAY;
@@ -376,8 +391,10 @@ void eval()
                 stack_push(&token);
                 ch = ' ';
                 break;
+			case SPACE:
+			    break;
             default:
-                /* printf("Unknown type %d\n", token.ltype); */
+                printf("Unknown type %d\n", token.ltype);
                 break;
             }
         }
