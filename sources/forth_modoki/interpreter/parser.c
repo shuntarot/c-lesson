@@ -10,7 +10,7 @@ static int is_number(const int ch)
 
 static int is_alpha(const int ch)
 {
-    if (('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z'))
+    if (('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ch == '_')
         return 1;
     else
         return 0;
@@ -47,10 +47,10 @@ int parse_one(int prev_ch, Token_t* out_token)
         return ch;
     }
 
-    if (prev_ch == ' ') {
+    if (prev_ch == ' ' || prev_ch == '\t') {
         do {
             ch = cl_getc();
-        } while (ch == ' ');
+        } while (ch == ' ' || ch == '\t');
 
         out_token->ltype = SPACE;
         return ch;
